@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>물류 기업 ERP 프로세스 심층 분석</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #003366;
+    --navy-light: #e8eef5;
+    --navy-mid: #1a4f8a;
+    --bg: #f0f3f8;
+    --white: #ffffff;
+    --gray-1: #f8f9fb;
+    --gray-2: #e2e8f0;
+    --gray-3: #94a3b8;
+    --text: #1e293b;
+    --text-sub: #475569;
+    --warn: #b45309;
+    --warn-bg: #fffbeb;
+    --success: #166534;
+    --success-bg: #f0fdf4;
+    --danger: #991b1b;
+    --danger-bg: #fff1f2;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,51,102,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,51,102,0.14);
+    --font-body: 'Noto Sans KR', sans-serif;
+    --font-display: 'DM Serif Display', serif;
+    --font-mono: 'JetBrains Mono', 'Noto Sans KR', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── STICKY NAV ── */
+  #top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 32px;
+    height: 52px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  #top-nav::-webkit-scrollbar { display: none; }
+  .nav-brand {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: .05em;
+    white-space: nowrap;
+    margin-right: 28px;
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.65);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0 14px;
+    height: 52px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+    flex-shrink: 0;
+  }
+  .nav-btn:hover { color: #fff; }
+  .nav-btn.active { color: #fff; border-bottom-color: #fff; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--navy);
+    padding: 64px 0 52px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      90deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 80px
+    ),
+    repeating-linear-gradient(
+      0deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 80px
+    );
+  }
+  .hero-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 38px;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .hero h1 span { color: rgba(255,255,255,0.6); font-size: 26px; display: block; margin-top: 6px; }
+  .hero-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    font-family: var(--font-mono);
+  }
+  .hero-meta-item strong { color: rgba(255,255,255,0.8); font-weight: 600; }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-top: 52px;
+    scroll-margin-top: 68px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    width: 36px; height: 36px;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+  .section-action {
+    font-size: 14px;
+    color: var(--text-sub);
+    font-style: italic;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    border-left: 3px solid var(--navy);
+    background: var(--navy-light);
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* ── CARDS ── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-2);
+    box-shadow: var(--shadow);
+    padding: 22px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon {
+    width: 22px; height: 22px;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .card p { font-size: 14px; color: var(--text-sub); line-height: 1.7; }
+  .card ul { list-style: none; font-size: 13.5px; color: var(--text-sub); }
+  .card ul li { padding: 4px 0; padding-left: 14px; position: relative; }
+  .card ul li::before { content: '—'; position: absolute; left: 0; color: var(--navy); font-size: 11px; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.7;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout.navy { background: var(--navy-light); border-left: 4px solid var(--navy); color: var(--navy); }
+  .callout.warn  { background: var(--warn-bg);   border-left: 4px solid var(--warn);  color: var(--warn); }
+  .callout.ok    { background: var(--success-bg);border-left: 4px solid var(--success);color: var(--success);}
+  .callout.red   { background: var(--danger-bg); border-left: 4px solid var(--danger); color: var(--danger); }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body strong { display: block; font-weight: 700; margin-bottom: 4px; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-2);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: var(--navy); color: #fff; }
+  thead th { padding: 11px 16px; text-align: left; font-weight: 600; font-size: 13px; }
+  tbody tr { border-bottom: 1px solid var(--gray-2); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: var(--gray-1); }
+  tbody td { padding: 10px 16px; color: var(--text-sub); vertical-align: top; line-height: 1.6; }
+  tbody td:first-child { font-weight: 600; color: var(--text); }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin: 1px 2px;
+  }
+  .tag.navy { background: var(--navy); color: #fff; }
+  .tag.gray { background: var(--gray-2); color: var(--text); }
+  .tag.warn { background: #fef3c7; color: var(--warn); }
+  .tag.ok   { background: #dcfce7; color: var(--success); }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-diagram {
+    background: var(--white);
+    border: 1px solid var(--gray-2);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px 20px;
+    margin: 16px 0;
+    overflow-x: auto;
+  }
+  .flow-diagram h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 18px;
+    letter-spacing: .04em;
+  }
+  .flow-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
+  .flow-node {
+    background: var(--navy-light);
+    border: 1.5px solid var(--navy);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--navy);
+    text-align: center;
+    min-width: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+  .flow-node .sub { font-size: 11px; font-weight: 400; color: var(--text-sub); }
+  .flow-node.highlight { background: var(--navy); color: #fff; }
+  .flow-node.highlight .sub { color: rgba(255,255,255,.65); }
+  .flow-arrow {
+    display: flex; align-items: center;
+    padding: 0 4px;
+    color: var(--navy);
+    font-size: 18px;
+    font-weight: 300;
+  }
+  .flow-label {
+    position: absolute;
+    bottom: -20px;
+    font-size: 10px;
+    color: var(--gray-3);
+    white-space: nowrap;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .flow-section-label {
+    font-size: 11px;
+    color: var(--text-sub);
+    background: var(--gray-2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-bottom: 6px;
+    text-align: center;
+    letter-spacing: .04em;
+  }
+  .flow-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+  /* ── KPI ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .kpi-card {
+    background: var(--white);
+    border: 1px solid var(--gray-2);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    border-top: 3px solid var(--navy);
+  }
+  .kpi-label { font-size: 11.5px; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; letter-spacing: .04em; }
+  .kpi-value { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--navy); }
+  .kpi-desc { font-size: 12px; color: var(--gray-3); margin-top: 4px; }
+
+  /* ── PROCESS TABLE ── */
+  .proc-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .proc-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 1fr;
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--gray-2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .proc-label {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+  }
+  .proc-cell {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-sub);
+    border-left: 1px solid var(--gray-2);
+  }
+  .proc-cell strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: .06em;
+    margin-bottom: 16px;
+  }
+
+  /* ── IC FLOW ── */
+  .ic-diagram {
+    background: var(--white);
+    border: 1px solid var(--gray-2);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .ic-diagram h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 18px; }
+  .ic-entities {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .ic-entity {
+    background: var(--navy-light);
+    border: 2px solid var(--navy);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+    min-width: 130px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .ic-entity .sub { font-size: 11px; font-weight: 400; color: var(--text-sub); margin-top: 2px; }
+  .ic-arrows { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+  .ic-arrow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+  .ic-arrow-line {
+    flex: 1;
+    height: 1.5px;
+    background: var(--navy);
+    position: relative;
+  }
+  .ic-arrow-line::after { content: '▶'; position: absolute; right: -6px; top: -8px; color: var(--navy); font-size: 11px; }
+  .ic-arrow-label {
+    background: var(--navy-light);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .card-grid-3, .card-grid-2 { grid-template-columns: 1fr; }
+    .proc-row { grid-template-columns: 1fr; }
+    .proc-label { border-radius: 0; }
+    .hero h1 { font-size: 26px; }
+    .hero h1 span { font-size: 18px; }
+    #top-nav { padding: 0 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav id="top-nav">
+  <div class="nav-brand">ASPN · 물류 ERP</div>
+  <button class="nav-btn active" onclick="scrollTo('s1',this)">01 LOB 특징</button>
+  <button class="nav-btn" onclick="scrollTo('s2',this)">02 3PL 구현</button>
+  <button class="nav-btn" onclick="scrollTo('s3',this)">03 연결결산</button>
+  <button class="nav-btn" onclick="scrollTo('s4',this)">04 관계사 거래</button>
+  <button class="nav-btn" onclick="scrollTo('s5',this)">05 KPI</button>
+  <button class="nav-btn" onclick="scrollTo('s6',this)">06 구현 전략</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">ASPN CONSULTING GROUP · DEEP ANALYSIS REPORT</div>
+  <h1>물류 기업 ERP 프로세스
+    <span>심층 분석 보고서</span>
+  </h1>
+  <p class="hero-sub">3PL 비즈니스 특성 기반 SAP 구현 방향, 연결결산 관점의 관계사 거래 처리,<br>물류 KPI 관리 체계를 포함한 종합 분석</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">대상 <strong>물류·3PL 기업 ERP 담당자</strong></div>
+    <div class="hero-meta-item">플랫폼 <strong>SAP S/4HANA · Group Reporting</strong></div>
+    <div class="hero-meta-item">작성 <strong>ASPN Consulting Group</strong></div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 1: LOB 특징 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">물류 LOB의 ERP 프로세스 핵심 특징</div>
+  </div>
+  <div class="section-action">
+    📌 물류 기업은 제조·서비스와 달리 <strong>재고 비보유·다수 관계사 연계·운임 원가 중심</strong> 구조로, 표준 ERP 템플릿의 대폭 커스터마이징이 필수적이다.
+  </div>
+
+  <div class="callout navy">
+    <div class="callout-icon">◈</div>
+    <div class="callout-body">
+      <strong>핵심 명제</strong>
+      물류 기업의 수익 원천은 "서비스 마진(운임 수익 − 운송 원가)"이며, 실물 재고가 아닌 <strong>운송 이벤트(Shipment Event)</strong>가 ERP의 기본 전표 생성 트리거다. 이는 표준 SD-FI 또는 MM-FI 연계와 근본적으로 다른 설계를 요구한다.
+    </div>
+  </div>
+
+  <div class="badge">▸ 물류 LOB 5대 구조적 특성</div>
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <div class="card-title"><div class="icon">①</div>재고 비보유·패스스루 구조</div>
+      <p>화주(Shipper)의 화물을 취급하지만 법적 소유권이 없음. 재고는 화주 장부에 귀속되며, 3PL은 보관·운송 서비스 원가를 계상. <strong>WMS·TMS의 물리 재고와 SAP FI 간 인터페이스 설계</strong>가 구현의 핵심 난점.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">②</div>다중 Revenue Stream 혼재</div>
+      <p>단일 화물에 대해 <strong>운임(Freight), 창고보관료(Storage), 부대서비스(Handling, Customs), 연료할증료(BAF/CAF/FAF)</strong>가 동시 발생. 청구 기준이 수단·구간·무게별로 상이.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">③</div>원가의 외주 비중 압도적</div>
+      <p>물류 원가의 60~80%는 외주(하청 운송사, 항공사, 선사). SAP <strong>Service PO → GR → Invoice 3-way matching</strong>이 핵심 원가 통제 수단. 계약 단가 vs 실적 청구 단가 차이 관리 필수.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">④</div>수익 인식 시점의 복잡성</div>
+      <p>IFRS 15 기준 <strong>수행의무 이행 시점</strong>이 구간별로 상이(픽업/간선/납품). 특히 국제복합운송은 구간별 이행 여부에 따라 당기/차기 수익 안분이 필요. SAP Revenue Accounting(RAR) 연계 검토.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">⑤</div>관계사·파트너 거래의 고밀도</div>
+      <p>대형 물류 그룹은 항공·해운·육운·창고 법인을 계열화. 동일 화물에 수익/비용이 <strong>그룹 내 상하 법인을 통과</strong>하며, 연결결산 시 IC 상계 범위와 미실현이익 제거가 복잡.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">⑥</div>운영 시스템과 ERP의 이원화</div>
+      <p>TMS(Transportation Management System), WMS(Warehouse), FMS(Forwarding Management)는 별도 운영되며, <strong>SAP TM 또는 인터페이스 레이어</strong>를 통해 재무 전표로 전환. 이벤트 기반 자동 전기 설계가 품질 결정.</p>
+    </div>
+  </div>
+
+  <div class="badge" style="margin-top:28px">▸ 표준 산업 vs 물류 ERP 비교</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>구분</th>
+        <th>제조업 ERP</th>
+        <th>물류 ERP (3PL 포함)</th>
+        <th>핵심 차이</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>수익 트리거</td><td>제품 출하 (Delivery GI)</td><td>운송 이벤트 / 서비스 완료</td><td>이벤트 기반 전기</td></tr>
+        <tr><td>재고</td><td>자사 재고 보유 (MM)</td><td>화주 소유 재고 (위탁 관리)</td><td>WMS↔SAP 인터페이스</td></tr>
+        <tr><td>주요 원가</td><td>재료비, 노무비, 경비</td><td>외주운임, 창고료, 유류비</td><td>Service PO 비중 높음</td></tr>
+        <tr><td>가격 결정</td><td>표준원가 + 마진</td><td>Tariff/Rate Card + 협상</td><td>Rate Master 관리</td></tr>
+        <tr><td>수익 인식</td><td>출하 시점 일괄</td><td>구간별 이행 완료</td><td>IFRS 15 RAR 필요성</td></tr>
+        <tr><td>관계사 거래</td><td>내부 조달/이전가격</td><td>운송 구간별 수수료 Pass-through</td><td>IC 소거 복잡성 고</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 2: 3PL 구현 방향 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">3PL 비즈니스 특성에 따른 ERP 구현 방향</div>
+  </div>
+  <div class="section-action">
+    📌 3PL 기업은 화주 다변화·서비스 다양화·원가 투명성이라는 3개 축 위에서, <strong>수익 정합성·원가 추적·마진 가시성</strong>을 동시에 확보해야 한다.
+  </div>
+
+  <!-- 운임 청구 구조 -->
+  <div class="badge">▸ 3PL 수익 구조 및 청구 체계</div>
+
+  <div class="flow-diagram">
+    <h4>◆ 3PL 운임 청구 레이어 구조</h4>
+    <div class="flow-row" style="gap:6px; flex-wrap:wrap;">
+      <div class="flow-col">
+        <div class="flow-section-label">화주</div>
+        <div class="flow-node highlight">Shipper<div class="sub">화물주</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">3PL (자사)</div>
+        <div class="flow-node">NVO / Forwarder<div class="sub">계약 운임 청구</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">외주</div>
+        <div class="flow-node">Carrier / Co-loader<div class="sub">실제 운임 지급</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">운송 수단</div>
+        <div class="flow-node">선사 / 항공사 / 육운<div class="sub">B/L 발행</div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--gray-2)">
+      <div style="font-size:12px; color:var(--text-sub); font-weight:700; margin-bottom:8px">SAP 계정 매핑</div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; font-size:12px; color:var(--text-sub);">
+        <div style="background:var(--gray-1);padding:10px;border-radius:6px;border:1px solid var(--gray-2)">
+          <div style="font-weight:700;color:var(--navy)">수익(SD/FI)</div>
+          운임수익 <code>4xxx</code><br>창고보관료 <code>4xxx</code><br>부대서비스료 <code>4xxx</code>
+        </div>
+        <div style="background:var(--gray-1);padding:10px;border-radius:6px;border:1px solid var(--gray-2)">
+          <div style="font-weight:700;color:var(--navy)">원가(MM/FI)</div>
+          외주운임비 <code>5xxx</code><br>창고비용 <code>5xxx</code><br>포장·통관비 <code>5xxx</code>
+        </div>
+        <div style="background:var(--gray-1);padding:10px;border-radius:6px;border:1px solid var(--gray-2)">
+          <div style="font-weight:700;color:var(--navy)">CO (수익성 분석)</div>
+          CO-PA: 화주/항로/서비스별<br>Profitability Segment<br>→ 마진 Drill-down
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TMS-SAP 인터페이스 -->
+  <div class="badge" style="margin-top:24px">▸ TMS / WMS → SAP 인터페이스 설계 원칙</div>
+  <div class="proc-grid">
+    <div class="proc-row">
+      <div class="proc-label">운송 완료 이벤트</div>
+      <div class="proc-cell"><strong>TMS 트리거</strong>POD (Proof of Delivery) 수신 또는 서비스 완료 상태 변경 → SAP SD 자동 Billing 생성 (VF01 자동화)</div>
+      <div class="proc-cell"><strong>FI 전표</strong>Dr. 매출채권 / Cr. 운임수익 — 구간별 이행 완료 기준으로 수익 확정</div>
+    </div>
+    <div class="proc-row">
+      <div class="proc-label">외주 운임 확정</div>
+      <div class="proc-cell"><strong>MM PO 생성</strong>서비스 PO → 운송완료 GR (Service Entry Sheet) → Carrier Invoice 대조</div>
+      <div class="proc-cell"><strong>3-Way Matching</strong>PO 단가 vs SES 수량 vs Invoice 금액 허용오차 내 자동처리, 초과분 MIRO 보류</div>
+    </div>
+    <div class="proc-row">
+      <div class="proc-label">창고 보관료</div>
+      <div class="proc-cell"><strong>WMS 실적 데이터</strong>일별 팔레트/CBM 점유 실적 → SAP SD Resource-Related Billing (DP90) 자동 청구</div>
+      <div class="proc-cell"><strong>단가 Master</strong>화주별 Tariff Table (조건 레코드 VK11) 관리 — 화물 속성별 단가 분기 처리</div>
+    </div>
+    <div class="proc-row">
+      <div class="proc-label">부대서비스 청구</div>
+      <div class="proc-cell"><strong>Surcharge 항목</strong>BAF(유가할증), CAF(통화조정), THC(터미널처리비) 등 → 청구서 명세 자동 추가</div>
+      <div class="proc-cell"><strong>단가 연동</strong>월별/분기별 Surcharge Index 업데이트 → 조건 레코드 일괄 Mass Change</div>
+    </div>
+  </div>
+
+  <!-- Cost Object -->
+  <div class="badge" style="margin-top:24px">▸ CO 원가 대상(Cost Object) 설계</div>
+  <div class="card-grid card-grid-2">
+    <div class="card">
+      <div class="card-title"><div class="icon">A</div>내부오더 / WBS 기반 Job 관리</div>
+      <ul>
+        <li><strong>수주 건별 내부오더</strong> — 화주 + 항로 + B/L 번호 조합으로 오더 생성</li>
+        <li>수익·원가를 동일 오더에 귀속 → <strong>건별 마진 자동 산출</strong></li>
+        <li>대형 프로젝트 물류(현장 설치 포함) → WBS 계층 구조 적용</li>
+        <li>오더 종결 시 실제 원가 vs 예산 비교 리포트 자동 생성</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">B</div>CO-PA 수익성 분석 Segment</div>
+      <ul>
+        <li>Characteristic: 화주코드, 항로, 운송모드(AIR/SEA/LAND), 서비스 유형</li>
+        <li>Value Field: 운임수익, 외주운임, 창고비, 인건비, 간접비 배부</li>
+        <li>→ 화주별·항로별·모드별 <strong>Contribution Margin 실시간 Drill-down</strong></li>
+        <li>예산 시즌: CO-PA Plan 버전으로 전년 실적 기반 예산 수립</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>구현 Risk: 수익 인식 시점 불일치</strong>
+      국제복합운송(FCL/LCL) 화물은 출발지 픽업→항구 CY→해상 운송→목적지 배달까지 3~30일 소요. TMS 이벤트와 SAP Billing 자동화 시, <strong>월말 미완료 구간에 대한 Unbilled Revenue / Accrual 처리 Logic</strong>을 사전 설계하지 않으면 기간 손익이 왜곡된다.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 3: 연결결산 관점 분석 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">연결결산 관점: 화물 이동 경로와 관계사 거래</div>
+  </div>
+  <div class="section-action">
+    📌 화주의 화물이 최종 목적지에 도달하는 과정에서 그룹 내 복수 법인이 순차 개입하며, 각 단계의 수익/원가는 연결 시 <strong>상계 제거</strong> 대상이 된다.
+  </div>
+
+  <div class="badge">▸ 화물 이동 단계별 관여 법인 구조 (국제복합운송 사례)</div>
+
+  <div class="flow-diagram" style="padding:28px 24px">
+    <h4>◆ 그룹 내 화물 운송 Full Chain (예: 한국 → 유럽 수출)</h4>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="flow-col">
+        <div class="flow-section-label">국내 구간</div>
+        <div class="flow-node highlight">법인 A<div class="sub">국내 육운/창고</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">포워딩</div>
+        <div class="flow-node highlight">법인 B<div class="sub">국내 포워더</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">해상/항공</div>
+        <div class="flow-node">외부 선사<div class="sub">Ocean Carrier</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">현지 포워딩</div>
+        <div class="flow-node highlight">법인 C<div class="sub">해외 포워더(子)</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">최종 배송</div>
+        <div class="flow-node highlight">법인 D<div class="sub">현지 라스트마일</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-section-label">화주</div>
+        <div class="flow-node">수취인<div class="sub">Consignee</div></div>
+      </div>
+    </div>
+    <div style="font-size:11.5px; color:var(--text-sub); padding:10px; background:var(--navy-light); border-radius:6px;">
+      <span style="font-weight:700; color:var(--navy)">■ 연결 대상:</span> 법인 A·B·C·D는 동일 그룹 계열사 (연결 범위 내) &nbsp;|&nbsp; 
+      <span style="font-weight:700; color:var(--navy)">■ 외부 거래:</span> 외부 선사는 그룹 외부 → 연결 시 비용 유지 &nbsp;|&nbsp;
+      <span style="font-weight:700; color:var(--navy)">■ IC 소거:</span> A→B, B→C, C→D 간 운임 수수료 전액 상계
+    </div>
+  </div>
+
+  <!-- IC 거래 유형 -->
+  <div class="badge" style="margin-top:24px">▸ 단계별 관계사간(IC) 거래 유형 및 연결 처리</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>구간</th><th>거래 법인</th><th>IC 거래 내용</th><th>SAP GR 계정</th><th>연결 처리</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>국내 집화·창고</td>
+          <td>법인 A → 법인 B</td>
+          <td>국내 집화·창고 수수료 청구 (Pick-up Fee, Storage Fee)</td>
+          <td>수익(A): <code>IC-4100</code><br>비용(B): <code>IC-5100</code></td>
+          <td><span class="tag navy">전액 소거</span></td>
+        </tr>
+        <tr>
+          <td>국내 포워딩</td>
+          <td>법인 B → 화주</td>
+          <td>화주에게 운임 전체 청구 (총액 주선자 역할)</td>
+          <td>수익(B): <code>4100</code> 외부 수익</td>
+          <td><span class="tag gray">외부 수익 유지</span></td>
+        </tr>
+        <tr>
+          <td>현지 통관·배달</td>
+          <td>법인 B → 법인 C</td>
+          <td>현지 구간 수행 지시 및 대금 지급 (Agent Fee)</td>
+          <td>비용(B): <code>IC-5200</code><br>수익(C): <code>IC-4200</code></td>
+          <td><span class="tag navy">전액 소거</span></td>
+        </tr>
+        <tr>
+          <td>라스트마일 배송</td>
+          <td>법인 C → 법인 D</td>
+          <td>Door Delivery 수행 위탁 및 수수료 지급</td>
+          <td>비용(C): <code>IC-5300</code><br>수익(D): <code>IC-4300</code></td>
+          <td><span class="tag navy">전액 소거</span></td>
+        </tr>
+        <tr>
+          <td>자산 공유</td>
+          <td>법인 A ↔ 법인 D</td>
+          <td>창고·차량 임대, IT 시스템 사용료 등 내부 서비스</td>
+          <td>내부용역수익 / 내부비용</td>
+          <td><span class="tag navy">전액 소거</span></td>
+        </tr>
+        <tr>
+          <td>자금 내부 대출</td>
+          <td>지주 → 자법인</td>
+          <td>운전자본 지원 대출, 이자 수익 발생</td>
+          <td>이자수익 / 이자비용</td>
+          <td><span class="tag navy">전액 소거</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout red">
+    <div class="callout-icon">⚡</div>
+    <div class="callout-body">
+      <strong>미실현이익 제거 이슈</strong>
+      물류 기업 그룹의 창고 법인이 자산(부동산, 지게차 등)을 운영 법인에 양도 후 임대하는 Sale & Leaseback 구조 시, <strong>매각 시점의 내부 이익(IC Gain)이 연결상 미실현이익</strong>으로 자산 조정 대상이 된다. SAP Group Reporting에서 Investment Elimination과 별도로 <strong>Upstream/Downstream 미실현이익 제거 Rule</strong>을 설정해야 한다.
+    </div>
+  </div>
+
+  <!-- Group Reporting 설정 -->
+  <div class="badge" style="margin-top:24px">▸ SAP Group Reporting IC 관리 설계 포인트</div>
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <div class="card-title"><div class="icon">G</div>IC Partner 마스터</div>
+      <ul>
+        <li>Trading Partner 필드 필수 입력 — 법인 코드와 1:1 매핑</li>
+        <li>IC 거래 계정은 반드시 IC-전용 FS Item으로 분리 (예: IC-4100 vs 4100)</li>
+        <li>거래 빈도 높은 계열사 간 <strong>자동 대조 설정</strong> (Reclassification Rule)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">R</div>IC 조정 프로세스</div>
+      <ul>
+        <li>월말 IC Matching Report → 차이 분석 → GRID 수정</li>
+        <li>운임 청구 기준(발행일 vs 이벤트일) 차이로 발생하는 <strong>Timing Difference 관리</strong></li>
+        <li>환율 차이(Transaction vs Group Rate) 조정 규칙 사전 정의</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">E</div>자동 소거 Rule</div>
+      <ul>
+        <li>IC 수익/비용 자동 소거: Consolidation Unit 간 동일 금액 매칭</li>
+        <li>IC 채권/채무 자동 소거: AR/AP Netting Rule</li>
+        <li>배당 소거, 지분법 조정은 투자 제거 Task에서 별도 처리</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 4: 관계사 거래 심층 분석 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">물류 그룹 관계사 거래 심층 분석</div>
+  </div>
+  <div class="section-action">
+    📌 이전가격(Transfer Pricing)과 그룹 전략적 운임 구조는 세무·회계 양면에서 정합성을 확보해야 하며, ERP 설계 단계에서 이를 반영하지 않으면 연결결산·세무조사 대응 모두 취약해진다.
+  </div>
+
+  <div class="badge">▸ 물류 그룹 이전가격(TP) 구조</div>
+  <div class="card-grid card-grid-2">
+    <div class="card">
+      <div class="card-title"><div class="icon">T</div>Cost Plus 방식 (보편적)</div>
+      <p style="margin-bottom:10px">자법인 → 모법인 또는 관계사 서비스 제공 시, <strong>직접원가 + 일정 마크업(Mark-up %)</strong>으로 이전가격 설정. 물류 서비스의 경우 외주운임을 베이스로 15~25% 마크업 적용 사례가 일반적.</p>
+      <div style="background:var(--gray-1);border-radius:6px;padding:10px;font-size:12.5px;border:1px solid var(--gray-2)">
+        <code>이전가격 = 외주원가 × (1 + Mark-up Rate)</code><br>
+        <span style="color:var(--text-sub)">ERP: Service PO 단가 = TP 문서 기준 단가로 Lock</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">C</div>Comparable Uncontrolled Price (CUP)</div>
+      <p style="margin-bottom:10px">외부 시장 운임과 비교 가능한 구간의 경우, <strong>외부 운임 지수(CCFI, SCFI, TAC Index)</strong> 기준으로 IC 운임 책정. 시장 변동에 따른 주기적 재설정 필요.</p>
+      <div style="background:var(--gray-1);border-radius:6px;padding:10px;font-size:12.5px;border:1px solid var(--gray-2)">
+        <span style="color:var(--text-sub)">ERP 대응: 분기별 Rate Master 업데이트 + 변경이력 로그 관리 필수 (세무 소명 자료)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="badge" style="margin-top:24px">▸ 관계사 거래 유형 매트릭스</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>거래 유형</th><th>발생 원인</th><th>회계 처리</th><th>TP 이슈</th><th>연결 리스크</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>운송 수수료 Pass-through</td>
+          <td>포워더-캐리어 구간 분리</td>
+          <td>IC 수익/비용 대응 계상</td>
+          <td>마크업 적정성</td>
+          <td><span class="tag navy">高</span> 금액 대·빈도 高</td>
+        </tr>
+        <tr>
+          <td>창고 임대료</td>
+          <td>창고 법인 → 운영 법인 임대</td>
+          <td>임대수익/임차비용</td>
+          <td>시장 임대료 비교</td>
+          <td><span class="tag warn">中</span> IFRS 16 리스 검토</td>
+        </tr>
+        <tr>
+          <td>IT 시스템 사용료</td>
+          <td>IT 자회사 → 계열사 서비스</td>
+          <td>용역수익/비용</td>
+          <td>사용량 기반 배부</td>
+          <td><span class="tag gray">低</span></td>
+        </tr>
+        <tr>
+          <td>자금 대여</td>
+          <td>지주사 → 자법인 운전자본 지원</td>
+          <td>대여금/차입금, 이자수익/비용</td>
+          <td>시장이자율 적용</td>
+          <td><span class="tag warn">中</span> 이자 소거</td>
+        </tr>
+        <tr>
+          <td>경영관리 서비스</td>
+          <td>지주 본사 기능 제공</td>
+          <td>관리용역수익/비용</td>
+          <td>배부 기준 합리성</td>
+          <td><span class="tag gray">低</span></td>
+        </tr>
+        <tr>
+          <td>자산 매각 후 임대</td>
+          <td>Sale & Leaseback (창고·차량)</td>
+          <td>처분손익, 사용권자산/리스부채</td>
+          <td>매각가 적정성</td>
+          <td><span class="tag navy">高</span> 미실현이익</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout ok">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <strong>SAP S/4HANA IC 거래 관리 Best Practice</strong>
+      거래 빈도가 높은 운송 수수료는 <strong>SAP Business Partner에 Trading Partner 코드를 의무 입력</strong>하고, IC 전용 계정과목(FS Item)을 별도 유지해야 Group Reporting의 자동 소거 Rule이 오작동 없이 작동한다. 월말 IC Reconciliation은 Group Reporting의 Intercompany Matching Monitor(FICAXX)를 활용해 차이 조기 감지.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 5: KPI -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">물류 기업 핵심 KPI 관리 체계</div>
+  </div>
+  <div class="section-action">
+    📌 물류 KPI는 재무(수익성)·운영(효율성)·서비스(품질)·리스크(이행율) 4개 축으로 구성되며, SAP Analytics Cloud에서 실시간 Dashboard로 가시화해야 경영 의사결정에 활용된다.
+  </div>
+
+  <div class="badge">▸ 재무 KPI</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">FREIGHT GROSS MARGIN</div><div class="kpi-value">운임 총마진율</div><div class="kpi-desc">= (운임수익 − 외주운임) / 운임수익. 포워더 수익성 핵심 지표. 통상 15~30%.</div></div>
+    <div class="kpi-card"><div class="kpi-label">NET REVENUE / SHIPMENT</div><div class="kpi-value">건당 순수익</div><div class="kpi-desc">총수익에서 외주비 차감 후 건당 환산. CO 내부오더 집계.</div></div>
+    <div class="kpi-card"><div class="kpi-label">YIELD (운임단가)</div><div class="kpi-value">단위당 운임</div><div class="kpi-desc">항공: USD/kg, 해상: USD/TEU, 육운: 원/km. 시장 vs 실적 비교.</div></div>
+    <div class="kpi-card"><div class="kpi-label">DSO (매출채권회수일)</div><div class="kpi-value">Days Sales Outstanding</div><div class="kpi-desc">화주 신용위험 조기 감지. SAP FI AR Aging Report 자동화.</div></div>
+    <div class="kpi-card"><div class="kpi-label">EBITDA MARGIN</div><div class="kpi-value">EBITDA 비율</div><div class="kpi-desc">감가상각·이자·세전 이익률. 자산 집약적 창고부문 성과 평가.</div></div>
+    <div class="kpi-card"><div class="kpi-label">COST TO REVENUE RATIO</div><div class="kpi-value">원가율</div><div class="kpi-desc">= 총원가 / 총수익. 외주비, 인건비, 감가상각 포함 종합 효율.</div></div>
+  </div>
+
+  <div class="badge" style="margin-top:24px">▸ 운영 KPI</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">ON-TIME DELIVERY RATE</div><div class="kpi-value">정시 배송율</div><div class="kpi-desc">= 약속일 내 납품건 / 전체 납품건. 화주 SLA 핵심 지표. TMS → SAP 집계.</div></div>
+    <div class="kpi-card"><div class="kpi-label">LOAD FACTOR</div><div class="kpi-value">적재효율</div><div class="kpi-desc">= 실제 적재량 / 최대 용량. 트럭: CBM 기준, 항공: kg 기준.</div></div>
+    <div class="kpi-card"><div class="kpi-label">WAREHOUSE UTILIZATION</div><div class="kpi-value">창고 가동율</div><div class="kpi-desc">= 점유 팔레트 / 총 팔레트. WMS 실시간 데이터 → SAP CO 배부 기준.</div></div>
+    <div class="kpi-card"><div class="kpi-label">TRANSIT TIME VARIANCE</div><div class="kpi-value">리드타임 편차</div><div class="kpi-desc">실제 운송 소요일 vs 표준 리드타임 편차. TMS 이벤트 데이터 집계.</div></div>
+    <div class="kpi-card"><div class="kpi-label">INVOICE ACCURACY RATE</div><div class="kpi-value">청구 정확율</div><div class="kpi-desc">= 오류 없는 청구서 / 전체 청구서. 3-way matching 자동 처리율 반영.</div></div>
+    <div class="kpi-card"><div class="kpi-label">CLAIMS RATIO</div><div class="kpi-value">클레임 발생율</div><div class="kpi-desc">= 클레임 건수 / 총 운송건수. 화물 손망실·지연 클레임 비용 추적.</div></div>
+  </div>
+
+  <div class="badge" style="margin-top:24px">▸ 연결결산 관점 KPI</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>KPI</th><th>정의</th><th>SAP 데이터 소스</th><th>경영 시사점</th></tr></thead>
+      <tbody>
+        <tr><td>IC 거래 비중</td><td>연결 수익 대비 IC 수익 비중</td><td>Group Reporting FS Items</td><td>그룹 내부화 전략 vs 외부 시장 개방도</td></tr>
+        <tr><td>IC Matching 차이율</td><td>월말 IC 조정 전 불일치 금액 / IC 총거래</td><td>GR IC Matching Monitor</td><td>인터페이스 품질·청구 적시성 측정</td></tr>
+        <tr><td>미실현이익 제거금액</td><td>연결 조정 중 IC 이익 제거액</td><td>GR Elimination Journal</td><td>그룹 내 이전가격 마진 수준 모니터링</td></tr>
+        <tr><td>자법인별 기여 마진</td><td>연결 전 법인별 순이익 기여</td><td>GR Segment Reporting</td><td>법인 포트폴리오 전략 (투자 vs 회수)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout navy">
+    <div class="callout-icon">◈</div>
+    <div class="callout-body">
+      <strong>SAC (SAP Analytics Cloud) 대시보드 설계 원칙</strong>
+      KPI는 ① 재무 KPI (FI/CO → SAC), ② 운영 KPI (TMS/WMS → BTP DataSphere → SAC), ③ 연결 KPI (Group Reporting → SAC)의 <strong>3-Layer 데이터 흐름</strong>으로 설계해야 리포트 간 정합성을 확보할 수 있다. 단일 SAC Story에서 Legal Entity View와 Consolidated View를 탭 전환으로 제공하는 구조가 경영진 활용도가 높다.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 6: 구현 전략 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">물류 ERP 구현 전략 및 로드맵</div>
+  </div>
+  <div class="section-action">
+    📌 물류 ERP 전환은 <strong>Phase 1 기반 안정화 → Phase 2 운영시스템 통합 → Phase 3 연결결산·분석 고도화</strong>의 3단계 접근이 리스크를 최소화한다.
+  </div>
+
+  <div class="badge">▸ 3-Phase 구현 로드맵</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Phase</th><th>기간</th><th>핵심 범위</th><th>주요 산출물</th><th>성공 기준</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag navy">Phase 1</span> 기반 구축</td>
+          <td>M1 ~ M8</td>
+          <td>SAP FI/CO 기본 설정, Chart of Accounts, Trading Partner, IC 계정 분리, Service PO-GR-IV 프로세스</td>
+          <td>FI 전표 자동화 / MM 외주 원가 흐름 / IC 기초 소거</td>
+          <td>월결산 D+5 이내 마감 달성</td>
+        </tr>
+        <tr>
+          <td><span class="tag navy">Phase 2</span> 운영통합</td>
+          <td>M9 ~ M16</td>
+          <td>TMS/WMS 인터페이스, SD 자동 Billing, CO-PA 수익성 분석, SAP TM 검토, 창고보관료 자동 청구</td>
+          <td>실시간 운임 마진 리포트 / 건별 수익성 추적 / Rate Master 자동화</td>
+          <td>수동 청구서 비중 5% 미만</td>
+        </tr>
+        <tr>
+          <td><span class="tag navy">Phase 3</span> 연결·분석</td>
+          <td>M17 ~ M22</td>
+          <td>SAP Group Reporting 구현, 연결결산 자동화, SAC 대시보드, IC 자동 소거 Rule 완성, IFRS 16 리스 처리</td>
+          <td>연결재무제표 D+10 자동화 / SAC KPI 대시보드 / TP 문서화 지원</td>
+          <td>외부 감사인 GR 검토 통과</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="badge" style="margin-top:24px">▸ 구현 핵심 성공 요인 (CSF)</div>
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <div class="card-title"><div class="icon">1</div>이벤트 기반 자동 전기 설계</div>
+      <p>TMS/WMS 이벤트(POD, GR, SES)가 SAP FI 전표로 자동 전환되는 <strong>인터페이스 신뢰성</strong>이 데이터 품질의 전부. 수동 보정 프로세스를 최소화해야 월결산 속도가 확보된다.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">2</div>IC 계정 체계 선제 설계</div>
+      <p>Go-live 이후 IC 계정을 추가하거나 변경하면 Group Reporting 소거 Rule 전체를 재검토해야 한다. <strong>Trading Partner + IC FS Item 체계는 Phase 1에서 완성</strong>해야 Phase 3 부담을 줄일 수 있다.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">3</div>Rate Master 거버넌스</div>
+      <p>물류 운임은 시장 변동이 빠르다. Rate Card(SD 조건 레코드)와 외주 단가(MM Info Record)의 <strong>유효기간 관리·변경 승인 프로세스·TP 문서 연계</strong>를 설계하지 않으면 청구 오류와 세무 리스크가 동시에 발생한다.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">4</div>월말 Accrual 자동화</div>
+      <p>미완료 운송 건의 미청구 수익(Unbilled Revenue)과 미입고 외주비(Accrued Expense)에 대해 <strong>TMS 진행 상태 기반 자동 Accrual Journal</strong>을 설계해야 기간 손익 왜곡이 방지된다.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">5</div>화주별 수익성 분석 구조</div>
+      <p>CO-PA Characteristic에 <strong>화주 코드, 항로 코드, 운송 모드</strong>를 반드시 포함해야 영업 조직이 원하는 "화주별 마진" 리포트가 가능하다. Profitability Segment 설계는 CO 컨설턴트·영업 담당자 공동 워크숍 필수.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon">6</div>변화관리 및 프로세스 정합</div>
+      <p>포워딩 현업 담당자는 FMS(Forwarding Mgmt System)를 주 업무 도구로 사용. <strong>FMS → SAP 자동 연계 시 현업 추가 작업이 최소화</strong>되어야 저항이 줄고 데이터 품질이 유지된다.</p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>주요 구현 실패 패턴 (현장 경험 기반)</strong>
+      ① <strong>수익 인식 시점 미정의</strong> — "운송 완료" 기준을 POD 수신으로 할지, B/L 발행일로 할지 Go-live 전 미결정 시 월말 청구서 미발행 급증 ② <strong>IC 계정 후속 추가</strong> — 특정 관계사 거래가 누락되어 연결 시 불일치 발생, GR 소거 Rule 수정 공수 폭증 ③ <strong>Rate Master 통제 부재</strong> — 영업팀이 직접 SD 조건을 입력해 TP 단가와 불일치, 세무조사 대응 불가
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="margin-top:60px; padding-top:24px; border-top:1px solid var(--gray-2); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+  <div style="font-family:var(--font-mono); font-size:12px; color:var(--gray-3)">
+    ASPN Consulting Group &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; 물류 ERP 심층 분석 보고서
+  </div>
+  <div style="font-size:12px; color:var(--gray-3)">
+    본 문서는 내부 교육 목적으로 작성되었습니다. 무단 배포를 금합니다.
+  </div>
+</div>
+
+</div><!-- /page-wrap -->
+
+<script>
+function scrollTo(id, btn) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// 스크롤에 따라 active nav 자동 업데이트
+const sections = ['s1','s2','s3','s4','s5','s6'];
+const navBtns = document.querySelectorAll('.nav-btn');
+window.addEventListener('scroll', () => {
+  let current = 's1';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 100) current = id;
+  });
+  navBtns.forEach((btn, i) => {
+    btn.classList.toggle('active', sections[i] === current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

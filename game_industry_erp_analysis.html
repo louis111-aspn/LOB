@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게임업계 ERP 구축 심층 분석 | ASPN</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #003366;
+    --navy-light: #0a4a8a;
+    --navy-dark: #002244;
+    --bg: #f0f3f8;
+    --bg-card: #ffffff;
+    --text: #1a1a2e;
+    --text-sub: #4a5568;
+    --text-muted: #718096;
+    --accent: #003366;
+    --warn: #b45309;
+    --warn-bg: #fffbeb;
+    --correct: #065f46;
+    --correct-bg: #ecfdf5;
+    --wrong: #991b1b;
+    --wrong-bg: #fef2f2;
+    --border: #d1dce8;
+    --border-light: #e8eff7;
+    --font-serif: 'DM Serif Display', serif;
+    --font-sans: 'Noto Sans KR', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Noto Sans KR', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  /* ── STICKY NAV ── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--navy);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: stretch;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    font-family: var(--font-serif);
+    font-size: 18px;
+    color: #fff;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .nav-logo span {
+    color: #7bb3f0;
+    margin-right: 6px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 52px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.07); }
+  .nav-tab.active { color: #fff; border-bottom-color: #7bb3f0; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, #0a4a8a 100%);
+    padding: 64px 48px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(123,179,240,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: 'GAME ERP';
+    position: absolute;
+    right: 48px; bottom: 16px;
+    font-family: var(--font-serif);
+    font-size: 96px;
+    color: rgba(255,255,255,0.04);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(123,179,240,0.18);
+    border: 1px solid rgba(123,179,240,0.35);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #a8cbf0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-size: 38px;
+    color: #ffffff;
+    line-height: 1.25;
+    margin-bottom: 14px;
+    max-width: 720px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: #7bb3f0;
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    max-width: 600px;
+    line-height: 1.7;
+  }
+
+  .hero-kpis {
+    display: flex;
+    gap: 24px;
+    margin-top: 36px;
+    flex-wrap: wrap;
+  }
+  .hero-kpi {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 16px 22px;
+    min-width: 140px;
+  }
+  .hero-kpi-val {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: #7bb3f0;
+    line-height: 1;
+  }
+  .hero-kpi-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 5px;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .section {
+    padding: 56px 0 40px;
+    scroll-margin-top: 56px;
+  }
+  .section + .section {
+    border-top: 1px solid var(--border-light);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--navy);
+    border-radius: 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .section-badge svg { width: 18px; height: 18px; fill: #fff; }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+  .section-subtitle {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 16px;
+    background: var(--navy);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── GRID ── */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  @media (max-width: 900px) {
+    .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; }
+    .hero { padding: 40px 24px; }
+    .hero h1 { font-size: 26px; }
+    .container { padding: 0 16px; }
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.65;
+    border-left: 4px solid;
+    margin: 16px 0;
+  }
+  .callout.navy { background: #eef3fb; border-color: var(--navy); color: var(--navy-dark); }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn); color: #7c3a00; }
+  .callout.correct { background: var(--correct-bg); border-color: #10b981; color: var(--correct); }
+  .callout.wrong { background: var(--wrong-bg); border-color: #ef4444; color: var(--wrong); }
+  .callout-label {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* ── VALUE CHAIN FLOW ── */
+  .flow-chain {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+  .flow-node {
+    flex: 1;
+    min-width: 160px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 14px;
+    text-align: center;
+    position: relative;
+  }
+  .flow-node.highlight {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+  .flow-node.highlight .fn-title { color: #fff; }
+  .flow-node.highlight .fn-sub { color: rgba(255,255,255,0.65); }
+
+  .fn-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .fn-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--navy);
+  }
+  .fn-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .fn-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .fn-tag {
+    font-size: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--text-sub);
+    font-family: var(--font-mono);
+  }
+  .flow-node.highlight .fn-tag {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.85);
+  }
+
+  .flow-arrow {
+    flex-shrink: 0;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  /* ── KPI TABLE ── */
+  .kpi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .kpi-table thead th {
+    background: var(--navy);
+    color: #fff;
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .kpi-table thead th:first-child { border-radius: 8px 0 0 0; }
+  .kpi-table thead th:last-child { border-radius: 0 8px 0 0; }
+  .kpi-table tbody tr { border-bottom: 1px solid var(--border-light); }
+  .kpi-table tbody tr:hover { background: #f7f9fc; }
+  .kpi-table td { padding: 10px 14px; vertical-align: top; line-height: 1.55; }
+  .kpi-table td:first-child { font-weight: 600; font-size: 13px; color: var(--navy); white-space: nowrap; }
+  .kpi-table .tag-cell { display: flex; flex-wrap: wrap; gap: 4px; }
+  .kpi-tag {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    background: #eef3fb;
+    color: var(--navy);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-weight: 500;
+  }
+  .kpi-tag.warn { background: #fef9ec; color: #92400e; }
+  .kpi-tag.ok { background: #ecfdf5; color: #065f46; }
+
+  /* ── IT PROCESS BLOCKS ── */
+  .process-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .process-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .process-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    background: var(--navy);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    margin-top: 1px;
+  }
+  .process-content {}
+  .process-title { font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 3px; }
+  .process-desc { font-size: 13.5px; color: var(--text-sub); line-height: 1.6; }
+
+  /* ── IC MATRIX ── */
+  .ic-matrix {
+    overflow-x: auto;
+  }
+  .ic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 620px;
+  }
+  .ic-table th {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .ic-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--border-light);
+    text-align: center;
+    vertical-align: middle;
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .ic-table td.row-head {
+    background: #eef3fb;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .ic-table td.has-txn { background: #fffbeb; }
+  .ic-table td.no-txn { background: #f7f9fc; color: #aaa; }
+
+  /* ── RISK CARDS ── */
+  .risk-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--navy);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .risk-level {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 8px;
+  }
+  .risk-level.high { background: #fee2e2; color: #991b1b; }
+  .risk-level.med { background: #fef3c7; color: #92400e; }
+  .risk-level.low { background: #d1fae5; color: #065f46; }
+  .risk-title { font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 6px; }
+  .risk-desc { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+
+  /* ── ACCORDION / DRILL-TOGGLE ── */
+  .accordion { display: flex; flex-direction: column; gap: 8px; }
+  .acc-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .acc-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: left;
+  }
+  .acc-trigger:hover { background: #f7f9fc; }
+  .acc-arrow {
+    width: 20px; height: 20px;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+    color: var(--navy);
+  }
+  .acc-item.open .acc-arrow { transform: rotate(90deg); }
+  .acc-body {
+    display: none;
+    padding: 0 20px 18px;
+    font-size: 13.5px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+  .acc-item.open .acc-body { display: block; }
+
+  /* ── DATA FLOW ── */
+  .data-flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 0;
+    align-items: center;
+    margin: 20px 0;
+  }
+  .df-node {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .df-node.source { border-color: #10b981; }
+  .df-node.target { border-color: var(--navy); background: #eef3fb; }
+  .df-arrow { text-align: center; color: var(--navy); font-size: 22px; }
+  .df-label { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .df-sub { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13.5px;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+  .checklist li::before {
+    content: '▸';
+    color: var(--navy);
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .checklist li strong { color: var(--text); font-weight: 600; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark);
+    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px;
+    margin-top: 60px;
+  }
+
+  /* ── MISC ── */
+  .mono { font-family: var(--font-mono); font-size: 12.5px; }
+  .text-navy { color: var(--navy); }
+  .text-muted { color: var(--text-muted); }
+  .mt8 { margin-top: 8px; }
+  .mt16 { margin-top: 16px; }
+  .mt24 { margin-top: 24px; }
+  .divider { height: 1px; background: var(--border-light); margin: 20px 0; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 12px;
+    vertical-align: middle;
+  }
+  .pill.dev { background: #dbeafe; color: #1e40af; }
+  .pill.pub { background: #ede9fe; color: #5b21b6; }
+  .pill.plat { background: #fce7f3; color: #9d174d; }
+  .pill.all { background: #e5e7eb; color: #374151; }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <a class="nav-logo" href="#">
+    <span>◈</span>ASPN
+  </a>
+  <div class="nav-tabs">
+    <a class="nav-tab active" href="#overview">업계 개요</a>
+    <a class="nav-tab" href="#value-chain">밸류체인</a>
+    <a class="nav-tab" href="#process">비즈니스 프로세스</a>
+    <a class="nav-tab" href="#erp">ERP 구축 특징</a>
+    <a class="nav-tab" href="#ic">내부거래 (IC)</a>
+    <a class="nav-tab" href="#kpi">핵심 KPI</a>
+    <a class="nav-tab" href="#risk">리스크 & 구축 전략</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">◈ ASPN LOB Series — Game Industry</div>
+  <h1>게임업계 그룹사 ERP 구축<br><em>심층 분석 가이드</em></h1>
+  <p class="hero-sub">개발사·퍼블리셔·플랫폼에 이르는 게임 그룹사의 프로세스 특성, 내부거래 구조, SAP ERP 구축 시 핵심 고려사항을 실무 관점에서 정리합니다.</p>
+  <div class="hero-kpis">
+    <div class="hero-kpi">
+      <div class="hero-kpi-val">3-tier</div>
+      <div class="hero-kpi-label">그룹사 구조<br>개발 → 퍼블리싱 → 플랫폼</div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-val">5대</div>
+      <div class="hero-kpi-label">핵심 IC 거래유형<br>로열티·IP·퍼블리싱 외</div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-val">2중</div>
+      <div class="hero-kpi-label">수익인식 복잡도<br>IFRS 15 + 가상재화</div>
+    </div>
+    <div class="hero-kpi">
+      <div class="hero-kpi-val">Real-time</div>
+      <div class="hero-kpi-label">정산 요구<br>플랫폼 수수료 즉시 반영</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- ① 업계 개요 -->
+  <section class="section" id="overview">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5S19.33 12 18.5 12z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">게임업계의 구조적 특수성</div>
+        <div class="section-subtitle">타 산업 대비 게임업계가 갖는 재무·회계·프로세스상 고유 특성</div>
+      </div>
+    </div>
+
+    <div class="callout navy">
+      <div class="callout-label">🎯 핵심 명제</div>
+      게임업계는 <strong>무형자산 중심의 IP 비즈니스</strong>이며, 수익인식·원가배분·내부거래 모두 IP 라이프사이클에 종속됩니다. ERP 설계는 IP 단위 수익/원가 추적 가능성(Traceability)을 최우선으로 해야 합니다.
+    </div>
+
+    <div class="grid-3 mt24">
+      <div class="card">
+        <div class="card-title">무형자산 집약형</div>
+        <ul class="checklist">
+          <li><strong>게임 IP</strong>가 핵심 자산 — 물리적 재고 없음</li>
+          <li>개발비의 <strong>자산화 vs 비용화</strong> 경계 복잡 (IAS 38)</li>
+          <li>IP 사용권 이전·분할·라이선스 구조 다양</li>
+          <li>IFRS 3 기준 <strong>사업결합 빈번</strong> (스튜디오 인수)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">수익구조의 복잡성</div>
+        <ul class="checklist">
+          <li><strong>IFRS 15</strong> — 다수 수행의무(PO) 내재</li>
+          <li>가상재화(아이템) 판매: 즉시인식 vs 이연</li>
+          <li>시즌패스·배틀패스: 기간 배분</li>
+          <li>서드파티 플랫폼 수수료: <strong>총액 vs 순액</strong> 판단</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">글로벌·멀티플랫폼</div>
+        <ul class="checklist">
+          <li>동시다발 <strong>다통화</strong> 결제 (USD, JPY, EUR, KRW)</li>
+          <li>국가별 세율·VAT·원천징수 상이</li>
+          <li>스팀·애플·구글·콘솔 플랫폼 <strong>각기 다른 정산구조</strong></li>
+          <li>로컬 규제 (중국 판호, 한국 등급 심의)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2 mt16">
+      <div class="card">
+        <div class="card-title">개발 원가 배분의 난점</div>
+        <ul class="checklist mt8">
+          <li>단일 프로젝트에 <strong>다수 팀 병렬 투입</strong> → 공통비 배부 기준 필요</li>
+          <li>Alpha·Beta·Live서비스 단계별 원가 성격 상이</li>
+          <li><strong>라이브 서버 운영비</strong>: 자본적 지출 vs 운영비 판단</li>
+          <li>QA·로컬라이제이션 등 <strong>공유 서비스 센터</strong> 배부 이슈</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">현금흐름의 특이성</div>
+        <ul class="checklist mt8">
+          <li><strong>선불 충전금</strong> (계약부채): 수백억 상시 존재</li>
+          <li>이벤트 期 매출 집중 → 월중 편차 극심</li>
+          <li>스팀 Valve 등 <strong>T+90일 정산</strong>으로 AR 장기화</li>
+          <li>환불·차지백 정책에 따른 <strong>변동대가</strong> 처리</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 밸류체인 -->
+  <section class="section" id="value-chain">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">게임 그룹사 밸류체인 구조</div>
+        <div class="section-subtitle">개발→퍼블리싱→플랫폼의 흐름과 각 법인별 핵심 기능</div>
+      </div>
+    </div>
+
+    <div class="flow-chain">
+      <div class="flow-node">
+        <div class="fn-icon">🎮</div>
+        <div class="fn-title">게임 개발사</div>
+        <div class="fn-sub">Developer / Studio</div>
+        <div class="fn-tags">
+          <span class="fn-tag">IP 창출</span>
+          <span class="fn-tag">개발비</span>
+          <span class="fn-tag">IAS 38</span>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node highlight">
+        <div class="fn-icon">📣</div>
+        <div class="fn-title">퍼블리셔</div>
+        <div class="fn-sub">Publisher (그룹 핵심)</div>
+        <div class="fn-tags">
+          <span class="fn-tag">마케팅</span>
+          <span class="fn-tag">유통</span>
+          <span class="fn-tag">IFRS 15</span>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="fn-icon">🏬</div>
+        <div class="fn-title">플랫폼</div>
+        <div class="fn-sub">Platform / Store</div>
+        <div class="fn-tags">
+          <span class="fn-tag">결제</span>
+          <span class="fn-tag">수수료</span>
+          <span class="fn-tag">정산</span>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="fn-icon">👥</div>
+        <div class="fn-title">최종 플레이어</div>
+        <div class="fn-sub">End User / Customer</div>
+        <div class="fn-tags">
+          <span class="fn-tag">결제</span>
+          <span class="fn-tag">AR</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3 mt16">
+      <div class="card">
+        <div class="card-title">🎮 개발사 주요 기능</div>
+        <ul class="checklist">
+          <li><strong>게임 IP 개발</strong>: 기획→개발→QA→출시</li>
+          <li>개발비 <strong>자산화 판단</strong> (기술적 실현 가능성)</li>
+          <li>IP 라이선스 제공: 퍼블리셔에 로열티 수취</li>
+          <li>업데이트·DLC·패치 <strong>라이브서비스</strong> 운영</li>
+          <li>공통 엔진·툴 개발 → 계열사 제공</li>
+        </ul>
+        <div class="callout warn mt16">
+          <div class="callout-label">⚠ ERP 포인트</div>
+          WBS 기반 프로젝트 회계 필수. 개발 단계별(Alpha/Beta/Gold) 원가 집계 및 자산화 전환 처리.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📣 퍼블리셔 주요 기능</div>
+        <ul class="checklist">
+          <li><strong>마케팅·UA</strong> (User Acquisition) 집행</li>
+          <li>글로벌 퍼블리싱 계약: 지역별 서브퍼블리셔</li>
+          <li>플랫폼 대금 수취 → 개발사 정산</li>
+          <li>매출 <strong>총액/순액 기준</strong> 판단 (IFRS 15.B34)</li>
+          <li>계열사 공유서비스(CSC) 제공·수취</li>
+        </ul>
+        <div class="callout navy mt16">
+          <div class="callout-label">📌 ERP 포인트</div>
+          멀티채널 수익 통합 + 개발사별·타이틀별 수익 배분. AR 관리(플랫폼별 정산주기 상이).
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏬 플랫폼 주요 기능</div>
+        <ul class="checklist">
+          <li><strong>결제 게이트웨이</strong> 운영 및 PG사 연동</li>
+          <li>포인트·캐시·충전금 관리 (계약부채)</li>
+          <li><strong>수수료 수취</strong>: 거래금액의 20~30%</li>
+          <li>이용자 계정·인증 관리</li>
+          <li>데이터 분석 인프라 운영 → 계열사 제공</li>
+        </ul>
+        <div class="callout correct mt16">
+          <div class="callout-label">✓ ERP 포인트</div>
+          선수금 계약부채 관리, 환불·소멸 처리 자동화. 결제 시스템 연동 인터페이스 설계 중요.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 비즈니스 프로세스 -->
+  <section class="section" id="process">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">법인 유형별 핵심 비즈니스 프로세스</div>
+        <div class="section-subtitle">SAP FI/CO 관점에서 각 법인에 필요한 프로세스와 구성 요소</div>
+      </div>
+    </div>
+
+    <div class="accordion">
+
+      <div class="acc-item open">
+        <button class="acc-trigger" onclick="toggleAcc(this)">
+          <span>🎮 개발사 — 프로젝트 회계 & 무형자산 관리</span>
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="acc-body">
+          <div class="grid-2">
+            <div>
+              <div class="callout navy">
+                <div class="callout-label">CO — 프로젝트 원가 관리</div>
+                <ul class="checklist mt8">
+                  <li>PS (Project System) 또는 Internal Order 활용</li>
+                  <li>게임 타이틀 = <strong>WBS Element</strong> 최상위 단위</li>
+                  <li>단계(기획/개발/베타/서비스) = 하위 WBS</li>
+                  <li>인건비·외주비·서버비 WBS 집계</li>
+                  <li>자산화 전환: AuC(건설중자산) → 무형자산 (IM 모듈)</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <div class="callout warn">
+                <div class="callout-label">FI — 무형자산 회계</div>
+                <ul class="checklist mt8">
+                  <li>IAS 38: 연구단계 <strong>즉시비용화</strong>, 개발단계 요건 충족 시 자산화</li>
+                  <li>Asset Class: 게임소프트웨어(5~10년 상각)</li>
+                  <li>손상검토: 타이틀별 현금창출단위(CGU) 지정</li>
+                  <li>조기종료 시 즉시 상각/손상 처리</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="process-list mt16">
+            <div class="process-item">
+              <div class="process-num">1</div>
+              <div class="process-content">
+                <div class="process-title">프로젝트 개시 → WBS/IO 생성</div>
+                <div class="process-desc">PM Office에서 타이틀 코드 확정 후 SAP PS에 WBS 생성. 예산(Budget) 설정 및 Availability Control 활성화. 인력 배정은 HR 모듈 Cost Center에서 Activity Type을 통해 WBS로 집계.</div>
+              </div>
+            </div>
+            <div class="process-item">
+              <div class="process-num">2</div>
+              <div class="process-content">
+                <div class="process-title">개발비 집계 → 자산화 전환 판단</div>
+                <div class="process-desc">매월 말 CFO/회계팀이 자산화 요건 충족 여부 검토. 요건 미충족 시 P&L 비용화. 충족 시 AuC 계정으로 이관. 단계 완료 시 AuC → 무형자산 Settlement.</div>
+              </div>
+            </div>
+            <div class="process-item">
+              <div class="process-num">3</div>
+              <div class="process-content">
+                <div class="process-title">출시 후 — 라이브서비스 원가 성격 변화</div>
+                <div class="process-desc">게임 출시(Gold) 이후 발생하는 서버 운영비, 패치 개발비의 자본화 여부 재판단. 기능 추가(DLC/대규모 업데이트) vs 유지보수 구분이 핵심.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" onclick="toggleAcc(this)">
+          <span>📣 퍼블리셔 — 수익인식 & 마케팅 원가</span>
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="acc-body">
+          <div class="callout wrong">
+            <div class="callout-label">⚡ IFRS 15 핵심 이슈 — 퍼블리셔</div>
+            게임 퍼블리셔는 다수의 수행의무(PO)가 하나의 계약에 혼재. 거래가격 배분이 비정형적이며 가변대가(환불, 할인, 로열티) 처리 자동화 필수.
+          </div>
+          <div class="grid-2 mt16">
+            <div>
+              <div class="card">
+                <div class="card-title">수익유형별 인식 기준</div>
+                <table class="kpi-table">
+                  <thead><tr><th>수익유형</th><th>인식 시점</th></tr></thead>
+                  <tbody>
+                    <tr><td>일회성 아이템 판매</td><td>판매 즉시</td></tr>
+                    <tr><td>기간제 아이템/구독</td><td>기간 안분</td></tr>
+                    <tr><td>배틀패스/시즌패스</td><td>콘텐츠 기간 배분</td></tr>
+                    <tr><td>퍼블리싱 계약 선수금</td><td>마일스톤/기간 배분</td></tr>
+                    <tr><td>광고 수익(인게임)</td><td>노출/클릭 시점</td></tr>
+                    <tr><td>IP 라이선스</td><td>계약 조건별 상이</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">마케팅 원가 구조</div>
+                <ul class="checklist">
+                  <li><strong>UA (User Acquisition)</strong>: 구글·메타·앱스토어 광고비 → 즉시비용화</li>
+                  <li><strong>CPI 기반 캠페인</strong>: 설치당 단가 → 변동원가 추적</li>
+                  <li>출시 전 마케팅비: 자산화 불가 → 발생 즉시 비용</li>
+                  <li>인플루언서·방송 협찬: 계약 기간 배분 여부 판단</li>
+                  <li>CO Profit Center별 UA 비용 배분: 타이틀별 손익 가시성</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" onclick="toggleAcc(this)">
+          <span>🏬 플랫폼 — 결제·정산·선수금 관리</span>
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="acc-body">
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">선수금(계약부채) 생애주기</div>
+                <div class="process-list">
+                  <div class="process-item">
+                    <div class="process-num">①</div>
+                    <div class="process-content">
+                      <div class="process-title">충전</div>
+                      <div class="process-desc">현금 입금 → 계약부채(선수금) 계상. 계정: 현금/PG사 AR ↔ 계약부채(게임머니)</div>
+                    </div>
+                  </div>
+                  <div class="process-item">
+                    <div class="process-num">②</div>
+                    <div class="process-content">
+                      <div class="process-title">사용(수익 전환)</div>
+                      <div class="process-desc">아이템 구매 시 계약부채 → 매출 대체. 잔여 충전금은 부채 유지</div>
+                    </div>
+                  </div>
+                  <div class="process-item">
+                    <div class="process-num">③</div>
+                    <div class="process-content">
+                      <div class="process-title">소멸·환불</div>
+                      <div class="process-desc">미사용 소멸: 계약부채 → 기타수익(소멸이익). 환불: 계약부채 or 매출 취소</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">외부 플랫폼 정산 구조</div>
+                <table class="kpi-table">
+                  <thead><tr><th>플랫폼</th><th>수수료율</th><th>정산주기</th></tr></thead>
+                  <tbody>
+                    <tr><td>Apple AppStore</td><td>30% (소규모 15%)</td><td>T+35일</td></tr>
+                    <tr><td>Google Play</td><td>30% (소규모 15%)</td><td>T+30일</td></tr>
+                    <tr><td>Steam (Valve)</td><td>30%/25%/20%</td><td>T+90일</td></tr>
+                    <tr><td>PlayStation</td><td>~30%</td><td>T+60일</td></tr>
+                    <tr><td>자사 PC 클라이언트</td><td>PG수수료만</td><td>즉시~T+7일</td></tr>
+                  </tbody>
+                </table>
+                <div class="callout warn mt16">
+                  <div class="callout-label">⚠ 총액/순액 판단</div>
+                  스팀·앱스토어 경유 매출: 퍼블리셔가 주체(Principal)인지 대리인(Agent)인지에 따라 총액 vs 수수료 차감 후 순액 인식이 결정됨.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ ERP 구축 특징 -->
+  <section class="section" id="erp">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">SAP ERP 구축 핵심 설계 포인트</div>
+        <div class="section-subtitle">게임 그룹사에 특유한 SAP 구성 및 설계 결정 사항</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-title">조직 구조 설계 (Enterprise Structure)</div>
+          <table class="kpi-table">
+            <thead><tr><th>SAP Object</th><th>게임 그룹사 매핑</th></tr></thead>
+            <tbody>
+              <tr><td>Company Code</td><td>법인별 1:1 (개발사/퍼블리셔/플랫폼)</td></tr>
+              <tr><td>Profit Center</td><td>게임 타이틀별 + 플랫폼별</td></tr>
+              <tr><td>Cost Center</td><td>팀/기능(개발/QA/마케팅/운영)</td></tr>
+              <tr><td>WBS Element</td><td>개별 게임 프로젝트 단위</td></tr>
+              <tr><td>Business Area</td><td>사업 부문(PC/모바일/콘솔)</td></tr>
+              <tr><td>Segment</td><td>IFRS 8 보고 세그먼트</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card mt16">
+          <div class="card-title">모듈 구성 권고안</div>
+          <table class="kpi-table">
+            <thead><tr><th>모듈</th><th>게임업계 활용 포인트</th><th>대상</th></tr></thead>
+            <tbody>
+              <tr><td>FI-AA</td><td>게임 IP 무형자산, AuC 자산화 관리</td><td><span class="pill dev">개발</span></td></tr>
+              <tr><td>CO-PC/PS</td><td>타이틀별 프로젝트 원가 집계</td><td><span class="pill dev">개발</span></td></tr>
+              <tr><td>CO-PA</td><td>타이틀/지역/채널별 Margin Analysis</td><td><span class="pill pub">퍼블</span></td></tr>
+              <tr><td>SD</td><td>퍼블리싱 계약, 로열티 정산</td><td><span class="pill pub">퍼블</span></td></tr>
+              <tr><td>TR/CM</td><td>다통화 현금 관리, FX Hedge</td><td><span class="pill all">공통</span></td></tr>
+              <tr><td>GR (Group Reporting)</td><td>그룹 연결결산, IC 제거</td><td><span class="pill all">그룹</span></td></tr>
+              <tr><td>BTP/CAP</td><td>게임 플랫폼 API 연동 미들레이어</td><td><span class="pill plat">플랫폼</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">외부 시스템 연동 설계</div>
+          <div class="process-list">
+            <div class="process-item">
+              <div class="process-num">1</div>
+              <div class="process-content">
+                <div class="process-title">게임 운영 DB → SAP FI (매출 인터페이스)</div>
+                <div class="process-desc">플레이어 구매 트랜잭션 → 배치 집계 → SAP SD/FI 분개. 아이템 코드와 SAP 수익유형 매핑 테이블 관리. 실시간(초/분단위) vs 일배치 선택이 핵심 설계 결정.</div>
+              </div>
+            </div>
+            <div class="process-item">
+              <div class="process-num">2</div>
+              <div class="process-content">
+                <div class="process-title">PG사·플랫폼 → SAP TR (정산 수취)</div>
+                <div class="process-desc">스팀·앱스토어 정산파일 수신 → SAP 은행 입금 대조. 플랫폼 수수료 자동 분개. 미정산 잔액 추적(AR Aging).</div>
+              </div>
+            </div>
+            <div class="process-item">
+              <div class="process-num">3</div>
+              <div class="process-content">
+                <div class="process-title">HR/Timesheet → CO (인건비 배부)</div>
+                <div class="process-desc">개발자 타임시트 → WBS별 인건비 배부. 프리랜서/외주 인력비 구분 관리. PM 도구(Jira 등)와 SAP PS 연동 고려.</div>
+              </div>
+            </div>
+            <div class="process-item">
+              <div class="process-num">4</div>
+              <div class="process-content">
+                <div class="process-title">분석 플랫폼 → SAP Analytics Cloud</div>
+                <div class="process-desc">게임 DAU/MAU/ARPU 데이터 → SAC 통합. 재무 지표와 운영 KPI 통합 대시보드. Live Connection 또는 Import Model 선택.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout navy mt16">
+          <div class="callout-label">📐 설계 원칙</div>
+          게임 트랜잭션 볼륨은 초당 수천 건 이상 가능. SAP에 실시간 연동하는 것은 부적합 — 게임 DB에서 집계 후 <strong>주기적 배치(1시간~1일)</strong>로 SAP에 연동하는 구조 권고. 단, 환불·차지백 등 이벤트성 처리는 준실시간 처리 설계.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 내부거래 -->
+  <section class="section" id="ic">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">그룹사 내부거래 (IC) 유형 및 회계 처리</div>
+        <div class="section-subtitle">개발사·퍼블리셔·플랫폼 간 주요 IC 거래 패턴과 연결결산 이슈</div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-label">⚠ 게임 그룹사 IC의 특수성</div>
+      게임 IP는 무형자산이므로 IP 이전·사용·로열티 등이 IC 거래의 핵심. <strong>IP의 이전(판매)인지, 라이선스(사용권)인지에 따라 연결 조정 방식이 전혀 다름.</strong> IP 내부 이전 시 미실현이익은 자산에서 제거되어야 하며, 이는 상각 기간 동안 지속적으로 추적 필요.
+    </div>
+
+    <div class="mt24">
+      <div class="card-title" style="margin-bottom:16px;">IC 거래 매트릭스</div>
+      <div class="ic-matrix">
+        <table class="ic-table">
+          <thead>
+            <tr>
+              <th style="min-width:120px;">거래 유형</th>
+              <th>개발사 → 퍼블리셔</th>
+              <th>개발사 → 플랫폼</th>
+              <th>퍼블리셔 → 개발사</th>
+              <th>퍼블리셔 → 플랫폼</th>
+              <th>플랫폼 → 퍼블리셔</th>
+              <th>플랫폼 → 개발사</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-head">IP 로열티</td>
+              <td class="has-txn">로열티 수익<br><span class="kpi-tag">매출-비용 상계</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+            <tr>
+              <td class="row-head">퍼블리싱 수수료</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="has-txn">퍼블리싱 서비스<br><span class="kpi-tag warn">서비스 성격</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+            <tr>
+              <td class="row-head">플랫폼 수수료</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="has-txn">플랫폼 이용료<br><span class="kpi-tag warn">서비스 상계</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+            <tr>
+              <td class="row-head">개발 용역</td>
+              <td class="has-txn">수탁개발<br><span class="kpi-tag ok">용역 상계</span></td>
+              <td class="has-txn">기술 지원<br><span class="kpi-tag">용역 상계</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+            <tr>
+              <td class="row-head">공유서비스(CSC)</td>
+              <td class="has-txn">IT인프라·HR<br><span class="kpi-tag">원가 배부</span></td>
+              <td class="has-txn">IT인프라<br><span class="kpi-tag">원가 배부</span></td>
+              <td class="has-txn">재무·법무<br><span class="kpi-tag">원가 배부</span></td>
+              <td class="has-txn">재무·법무<br><span class="kpi-tag">원가 배부</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+            <tr>
+              <td class="row-head">자금 대여</td>
+              <td class="has-txn">개발자금 대여<br><span class="kpi-tag warn">이자수익 상계</span></td>
+              <td class="no-txn">—</td>
+              <td class="has-txn">운영자금<br><span class="kpi-tag warn">이자수익 상계</span></td>
+              <td class="has-txn">운영자금<br><span class="kpi-tag warn">이자수익 상계</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+            <tr>
+              <td class="row-head">IP 내부 매각</td>
+              <td class="has-txn">IP 이전<br><span class="kpi-tag warn">미실현이익 제거</span></td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+              <td class="no-txn">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2 mt24">
+      <div class="card">
+        <div class="card-title">IC 로열티 — 연결 조정 메커니즘</div>
+        <ul class="checklist">
+          <li><strong>개발사(수취):</strong> IC 로열티 수익 → 연결 시 제거</li>
+          <li><strong>퍼블리셔(지급):</strong> 로열티 비용 → 연결 시 제거</li>
+          <li>결과: 연결 P&L에 미반영 (단순 상계)</li>
+          <li>단, 세금 효과(이연법인세) 처리 필요</li>
+          <li>이전가격(TP) 정책 문서화: <strong>정상가격 원칙</strong></li>
+        </ul>
+        <div class="callout navy mt16">
+          <div class="callout-label">SAP GR 처리</div>
+          Intercompany Elimination Task에서 IC 파트너 코드 기준으로 자동 매칭. 미일치 시 IC 차이 조정(IC Reconciliation) 프로세스 가동.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">IP 내부 매각 — 연결 미실현이익 제거</div>
+        <ul class="checklist">
+          <li>개발사 → 퍼블리셔 IP 매각: <strong>개별 재무제표상 이익 발생</strong></li>
+          <li>연결: 해당 이익은 미실현 → <strong>무형자산 장부가 조정</strong></li>
+          <li>퍼블리셔 무형자산 = 취득원가 기준(개발사 장부가)</li>
+          <li>퍼블리셔의 상각비도 그룹 원가 기준으로 재계산</li>
+          <li>IFRS 3 PPA(구매가격배분)와 충돌 가능성 주의</li>
+        </ul>
+        <div class="callout wrong mt16">
+          <div class="callout-label">⚡ 실무 위험</div>
+          IP 이전 시점 공정가치 평가 없이 임의 가격 책정 → 세무 이전가격 위반 및 연결 왜곡 동시 발생. 반드시 독립 평가 선행.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ KPI -->
+  <section class="section" id="kpi">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">법인 유형별 핵심 KPI 체계</div>
+        <div class="section-subtitle">재무 KPI, 운영 KPI, 연결결산 모니터링 지표를 구분하여 정리</div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="acc-item open">
+        <button class="acc-trigger" onclick="toggleAcc(this)">
+          <span>📊 그룹 공통 — 재무 성과 KPI</span>
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="acc-body">
+          <div class="ic-matrix">
+            <table class="kpi-table" style="min-width:700px;">
+              <thead>
+                <tr>
+                  <th>KPI</th>
+                  <th>정의 / 산식</th>
+                  <th>SAP 데이터 소스</th>
+                  <th>적용 법인</th>
+                  <th>비고</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Bookings</td>
+                  <td>실제 결제금액 (수익인식 전)</td>
+                  <td>게임DB → FI 인터페이스</td>
+                  <td><span class="pill pub">퍼블</span><span class="pill plat">플랫폼</span></td>
+                  <td>선행 지표</td>
+                </tr>
+                <tr>
+                  <td>Deferred Revenue</td>
+                  <td>Bookings - 인식 매출</td>
+                  <td>FI 계약부채 잔액</td>
+                  <td><span class="pill plat">플랫폼</span></td>
+                  <td>B/S 부채항목</td>
+                </tr>
+                <tr>
+                  <td>Net Revenue</td>
+                  <td>총매출 - 환불 - 플랫폼수수료</td>
+                  <td>CO-PA (수익요소)</td>
+                  <td><span class="pill all">공통</span></td>
+                  <td>핵심 매출 지표</td>
+                </tr>
+                <tr>
+                  <td>Game Margin</td>
+                  <td>Net Revenue - 직접원가</td>
+                  <td>CO-PA 타이틀별 마진</td>
+                  <td><span class="pill pub">퍼블</span></td>
+                  <td>타이틀별 관리</td>
+                </tr>
+                <tr>
+                  <td>Marketing ROI</td>
+                  <td>UA 비용 대비 LTV 기여도</td>
+                  <td>CO (마케팅 원가) + 게임 Analytics</td>
+                  <td><span class="pill pub">퍼블</span></td>
+                  <td>SAC 연동 분석</td>
+                </tr>
+                <tr>
+                  <td>Capitalized Dev %</td>
+                  <td>자산화 개발비 / 총 개발비</td>
+                  <td>WBS AuC 잔액 / 총 WBS 비용</td>
+                  <td><span class="pill dev">개발</span></td>
+                  <td>회계정책 준수 모니터링</td>
+                </tr>
+                <tr>
+                  <td>Impairment Risk</td>
+                  <td>무형자산 회수가능액 vs 장부가</td>
+                  <td>FI-AA + CGU 매출 실적</td>
+                  <td><span class="pill dev">개발</span></td>
+                  <td>반기/연간 손상검토</td>
+                </tr>
+                <tr>
+                  <td>IC Elimination Rate</td>
+                  <td>IC 거래 자동 매칭 비율</td>
+                  <td>SAP GR — IC Matching</td>
+                  <td><span class="pill all">그룹</span></td>
+                  <td>연결결산 품질 지표</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item open">
+        <button class="acc-trigger" onclick="toggleAcc(this)">
+          <span>🎯 게임 운영 KPI — SAP 연동 대상</span>
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="acc-body">
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-title">플레이어·수익 운영 KPI</div>
+                <table class="kpi-table">
+                  <thead><tr><th>KPI</th><th>정의</th></tr></thead>
+                  <tbody>
+                    <tr><td>DAU / MAU</td><td>일간/월간 활성 이용자수</td></tr>
+                    <tr><td>ARPU</td><td>이용자 1인당 평균 매출</td></tr>
+                    <tr><td>ARPPU</td><td>결제 이용자 1인당 평균 매출</td></tr>
+                    <tr><td>Paying Ratio</td><td>결제 이용자 / MAU</td></tr>
+                    <tr><td>LTV</td><td>이용자 생애가치 (예측)</td></tr>
+                    <tr><td>Churn Rate</td><td>이탈률 (월간)</td></tr>
+                    <tr><td>CPI / CAC</td><td>이용자 유치 단가</td></tr>
+                  </tbody>
+                </table>
+                <div class="callout navy mt16">
+                  <div class="callout-label">SAP 연동 포인트</div>
+                  이 KPI들은 SAP 외부(게임 Analytics)에서 생성되며, SAC를 통해 재무 데이터와 통합. CO-PA의 타이틀별 마진과 결합 → 진정한 타이틀 단위 수익성 분석.
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-title">플랫폼 운영 KPI</div>
+                <table class="kpi-table">
+                  <thead><tr><th>KPI</th><th>정의</th></tr></thead>
+                  <tbody>
+                    <tr><td>Take Rate</td><td>플랫폼 수수료 / 총 거래금액</td></tr>
+                    <tr><td>Refund Rate</td><td>환불금액 / 총 결제금액</td></tr>
+                    <tr><td>Chargeback Rate</td><td>차지백 건수 / 결제 건수</td></tr>
+                    <tr><td>충전금 잔액</td><td>미사용 계약부채 잔액</td></tr>
+                    <tr><td>포인트 소멸율</td><td>기간 내 소멸 / 전기말 잔액</td></tr>
+                    <tr><td>PG 정산 지연율</td><td>지연 수취 AR / 총 AR</td></tr>
+                    <tr><td>FX 영향</td><td>환율 변동이 매출에 미치는 영향</td></tr>
+                  </tbody>
+                </table>
+                <div class="callout warn mt16">
+                  <div class="callout-label">⚠ Refund Rate 임계값</div>
+                  카드사 차지백 비율 1% 초과 시 PG사 계약 제재 위험. SAP FI에서 실시간 모니터링 자동화 필요.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" onclick="toggleAcc(this)">
+          <span>📑 연결결산 & 그룹 통제 KPI</span>
+          <svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="acc-body">
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title">IC 품질 지표</div>
+              <ul class="checklist">
+                <li><strong>IC 거래 매칭률</strong>: GR 자동 매칭 비율 ≥ 95% 목표</li>
+                <li><strong>IC 차이 금액</strong>: 미매칭 잔액 절대액</li>
+                <li><strong>IC 조정 소요일</strong>: 마감 D-day 기준</li>
+                <li>IC 거래 누락율: 당기 신규 거래 등록 지연</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">결산 효율 지표</div>
+              <ul class="checklist">
+                <li><strong>Fast Close Days</strong>: 월마감 소요 영업일</li>
+                <li>수동 분개 건수: 자동화율 역지표</li>
+                <li><strong>재작성 빈도</strong>: 수정 후 재마감 횟수</li>
+                <li>GR 데이터 제출 준수율: 법인별 기한 준수</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-title">그룹 재무 지표</div>
+              <ul class="checklist">
+                <li><strong>Adjusted EBITDA</strong>: 상각비·일회성 제거</li>
+                <li>IP 자산 집중도: 무형자산/총자산</li>
+                <li><strong>FCF Conversion</strong>: EBITDA 대비 현금전환</li>
+                <li>개발비 자산화율 추이 (그룹 기준)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ 리스크 & 구축 전략 -->
+  <section class="section" id="risk">
+    <div class="section-header">
+      <div class="section-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">주요 리스크 및 ERP 구축 전략</div>
+        <div class="section-subtitle">게임 그룹사 SAP 프로젝트에서 반복 발생하는 실패 패턴과 대응 전략</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="risk-card">
+          <span class="risk-level high">HIGH RISK</span>
+          <div class="risk-title">게임 트랜잭션 볼륨과 SAP 성능</div>
+          <div class="risk-desc">온라인 게임의 경우 초당 수천~수만 건의 아이템 구매 트랜잭션 발생. SAP에 직접 연동 시 DB 성능 한계 도달. 미들레이어 집계 설계 없이 Go-Live 시 장애 발생 가능.</div>
+          <div class="callout correct mt16">
+            <div class="callout-label">✓ 대응 전략</div>
+            게임 DB에서 시간 단위 집계 후 배치 인터페이스. SAP S/4HANA의 HANA In-Memory 활용으로 조회 성능 확보. 실시간 KPI는 SAC Live Connection.
+          </div>
+        </div>
+        <div class="risk-card mt16">
+          <span class="risk-level high">HIGH RISK</span>
+          <div class="risk-title">IFRS 15 수행의무 식별 오류</div>
+          <div class="risk-desc">배틀패스·시즌패스 등 번들 상품의 수행의무 식별 실패 시 매출 인식 시기 오류. 특히 콘텐츠 업데이트 의무가 내재된 경우 기간 이연 필요 여부 판단 오류 빈번.</div>
+          <div class="callout correct mt16">
+            <div class="callout-label">✓ 대응 전략</div>
+            상품 유형별 수행의무 식별 정책 사전 문서화. SAP Revenue Accounting & Reporting(RAR) 모듈 도입 검토. 법무·회계팀과 협업하여 아이템 코드별 매핑 테이블 관리.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="risk-card">
+          <span class="risk-level med">MED RISK</span>
+          <div class="risk-title">개발비 자산화 기준 불일치</div>
+          <div class="risk-desc">법인별, 프로젝트별 자산화 기준이 통일되지 않을 경우 그룹 연결 시 비교 가능성 저하. 특히 인수된 스튜디오가 기존 정책과 다른 기준 적용 시 조정 필요.</div>
+          <div class="callout correct mt16">
+            <div class="callout-label">✓ 대응 전략</div>
+            그룹 공통 개발비 자산화 정책 수립 및 SAP WBS 상태 코드와 연동. Alpha/Beta/Gold 단계 코드로 자동화 트리거 설계.
+          </div>
+        </div>
+        <div class="risk-card mt16">
+          <span class="risk-level med">MED RISK</span>
+          <div class="risk-title">다통화 IC 거래 미매칭</div>
+          <div class="risk-desc">개발사(KRW)와 글로벌 퍼블리셔(USD) 간 IC 로열티 거래에서 환율 적용 기준 불일치로 연결 시 IC 차이 발생. 월말 환율 vs 평균환율 적용 기준을 사전 확정해야 함.</div>
+          <div class="callout correct mt16">
+            <div class="callout-label">✓ 대응 전략</div>
+            그룹 IC 환율 정책 문서화. SAP GR에서 IC 파트너 통화 자동 변환 설정. 월별 IC Reconciliation 프로세스 의무화.
+          </div>
+        </div>
+        <div class="risk-card mt16">
+          <span class="risk-level low">LOW RISK</span>
+          <div class="risk-title">SAC 데이터 신뢰성 (게임 Analytics 통합)</div>
+          <div class="risk-desc">게임 운영 데이터와 SAP 재무 데이터의 정의 불일치(매출 집계 시점, 환불 처리 방식 등)로 SAC 대시보드 신뢰도 저하 발생 가능.</div>
+          <div class="callout correct mt16">
+            <div class="callout-label">✓ 대응 전략</div>
+            단일 진실의 원천(SSOT) 정책 수립. SAP 재무 데이터가 최종 기준. 게임 Analytics KPI는 보조 레이어로 명확히 구분.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt24">
+      <div class="card-title">게임 그룹사 SAP 구축 로드맵 권고</div>
+      <div class="grid-4 mt16">
+        <div style="text-align:center;">
+          <div style="background:var(--navy);color:#fff;border-radius:8px;padding:12px;font-size:13px;font-weight:700;">Phase 1<br><span style="font-weight:400;font-size:12px;opacity:0.8;">0~6개월</span></div>
+          <div style="font-size:12.5px;color:var(--text-sub);margin-top:10px;line-height:1.6;">그룹 공통 FI/CO<br>Chart of Accounts<br>Profit Center 설계<br>IC 정책 확정</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="background:#0a4a8a;color:#fff;border-radius:8px;padding:12px;font-size:13px;font-weight:700;">Phase 2<br><span style="font-weight:400;font-size:12px;opacity:0.8;">6~12개월</span></div>
+          <div style="font-size:12.5px;color:var(--text-sub);margin-top:10px;line-height:1.6;">개발사 WBS/PS<br>무형자산 AA<br>퍼블리셔 SD·RAR<br>게임DB 인터페이스</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="background:#1a6abf;color:#fff;border-radius:8px;padding:12px;font-size:13px;font-weight:700;">Phase 3<br><span style="font-weight:400;font-size:12px;opacity:0.8;">12~18개월</span></div>
+          <div style="font-size:12.5px;color:var(--text-sub);margin-top:10px;line-height:1.6;">플랫폼 선수금·TR<br>GR 연결결산<br>IC Elimination<br>SAC 대시보드</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="background:#2d8ae0;color:#fff;border-radius:8px;padding:12px;font-size:13px;font-weight:700;">Phase 4<br><span style="font-weight:400;font-size:12px;opacity:0.8;">18개월~</span></div>
+          <div style="font-size:12.5px;color:var(--text-sub);margin-top:10px;line-height:1.6;">IFRS 16·18 대응<br>세무 TP 문서화<br>자동화 고도화<br>AI 예측 분석</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<footer>
+  © 2025 ASPN — SAP Consultant Education Series | 게임업계 ERP 구축 심층 분석 | Confidential & Proprietary
+</footer>
+
+<script>
+  // Accordion toggle
+  function toggleAcc(btn) {
+    const item = btn.closest('.acc-item');
+    item.classList.toggle('open');
+  }
+
+  // Active nav tab tracking
+  const sections = document.querySelectorAll('.section');
+  const navTabs = document.querySelectorAll('.nav-tab');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navTabs.forEach(tab => {
+          tab.classList.toggle('active', tab.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, { rootMargin: '-52px 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

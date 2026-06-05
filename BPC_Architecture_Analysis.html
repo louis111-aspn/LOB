@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPC 연결 관리회계 아키텍처 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #003366;
+    --navy-mid: #004080;
+    --navy-light: #e8eef5;
+    --accent: #003366;
+    --text: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-light: #8888aa;
+    --border: #d0d8e8;
+    --bg: #f7f8fc;
+    --white: #ffffff;
+    --rule-color: #003366;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Noto Serif KR', serif;
+    --sans: 'Noto Sans KR', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid rgba(255,255,255,0.15);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .header-title {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.95;
+  }
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── TOC ── */
+  .toc-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 56px;
+    z-index: 99;
+  }
+  .toc-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    height: 44px;
+    align-items: stretch;
+  }
+  .toc-item {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  .toc-item:hover {
+    color: var(--navy);
+    border-bottom-color: var(--navy);
+    background: var(--navy-light);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 56px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--navy);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: var(--navy);
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.35;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+  .hero-subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 680px;
+    line-height: 1.8;
+  }
+  .verdict-box {
+    margin-top: 36px;
+    background: var(--navy);
+    color: #fff;
+    padding: 24px 32px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .verdict-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+    white-space: nowrap;
+    min-width: 60px;
+  }
+  .verdict-text {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.6;
+    color: #fff;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    margin-bottom: 72px;
+    scroll-margin-top: 110px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--navy);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--navy);
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── ARCHITECTURE DIAGRAM ── */
+  .arch-diagram {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 40px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .arch-layer {
+    border: 1.5px solid var(--border);
+    margin-bottom: 0;
+    position: relative;
+  }
+  .arch-layer-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .arch-layer-tag {
+    font-size: 10px;
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+  }
+  .arch-layer-body {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .arch-layer-body.two-col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .arch-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    position: relative;
+  }
+  .arch-item.highlight {
+    background: var(--navy-light);
+    border-color: var(--navy);
+  }
+  .arch-item-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--navy);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .arch-item-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .arch-arrow {
+    text-align: center;
+    padding: 12px 0;
+    position: relative;
+  }
+  .arch-arrow::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--navy);
+    transform: translateX(-50%);
+  }
+  .arch-arrow-label {
+    display: inline-block;
+    background: var(--white);
+    border: 1.5px solid var(--navy);
+    color: var(--navy);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 4px 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+  }
+  .comp-table th {
+    background: var(--navy);
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 14px 20px;
+    text-align: left;
+    letter-spacing: 0.03em;
+  }
+  .comp-table td {
+    padding: 13px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.65;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: var(--bg); }
+  .comp-table .col-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--navy);
+    font-weight: 500;
+    width: 22%;
+  }
+  .comp-table .col-general {
+    color: var(--text-secondary);
+    width: 35%;
+  }
+  .comp-table .col-this {
+    color: var(--text);
+    font-weight: 500;
+    width: 35%;
+  }
+
+  /* ── INSIGHT CARDS ── */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .insight-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--navy);
+    padding: 24px;
+  }
+  .insight-num {
+    font-family: var(--mono);
+    font-size: 28px;
+    color: var(--navy);
+    opacity: 0.15;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .insight-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .insight-body {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  /* ── RISK TABLE ── */
+  .risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+  }
+  .risk-table th {
+    background: var(--navy);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 13px 20px;
+    text-align: left;
+    letter-spacing: 0.03em;
+  }
+  .risk-table td {
+    padding: 14px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.65;
+  }
+  .risk-table tr:last-child td { border-bottom: none; }
+  .risk-table tr:nth-child(even) td { background: var(--bg); }
+  .risk-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    font-weight: 500;
+  }
+  .risk-high { background: #003366; color: #fff; }
+  .risk-med  { background: #e8eef5; color: #003366; border: 1px solid #b0bcd0; }
+
+  /* ── PHILOSOPHY BOX ── */
+  .philosophy-box {
+    border: 1.5px solid var(--navy);
+    padding: 36px 40px;
+    margin: 32px 0;
+    position: relative;
+  }
+  .philosophy-box::before {
+    content: '"';
+    font-family: var(--serif);
+    font-size: 80px;
+    color: var(--navy);
+    opacity: 0.12;
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    line-height: 1;
+  }
+  .philosophy-text {
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--navy);
+    font-weight: 600;
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+  .philosophy-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding-left: 20px;
+    line-height: 1.7;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+  }
+  .checklist-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .checklist-item {
+    display: flex;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .check-idx {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--navy);
+    min-width: 24px;
+    margin-top: 2px;
+  }
+  .check-content { flex: 1; }
+  .check-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .check-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+  .check-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--navy-light);
+    color: var(--navy);
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--white);
+    border-top: 2px solid var(--navy);
+    padding: 32px 40px;
+  }
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-left {
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .footer-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-light);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── PROSE ── */
+  .prose {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    max-width: 780px;
+    margin-bottom: 24px;
+  }
+  .prose strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ── ANIMATIONS ── */
+  section {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hero {
+    opacity: 1;
+    transform: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <span class="header-title">BPC 연결 관리회계 아키텍처 — 구조 진단 보고서</span>
+    <span class="header-tag">Internal Architecture Review · Confidential</span>
+  </div>
+</header>
+
+<nav class="toc-bar">
+  <div class="toc-inner">
+    <a href="#s1" class="toc-item">01 · 전체 아키텍처</a>
+    <a href="#s2" class="toc-item">02 · 설계 철학</a>
+    <a href="#s3" class="toc-item">03 · 일반 구현 vs. 현 구조</a>
+    <a href="#s4" class="toc-item">04 · 핵심 설계 요소</a>
+    <a href="#s5" class="toc-item">05 · S/4HANA 전환 리스크</a>
+    <a href="#s6" class="toc-item">06 · 검증 체크리스트</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Architecture Diagnostic Report</div>
+    <h1 class="hero-title">SAP BPC 기반 커스텀<br>연결 관리회계 엔진 분석</h1>
+    <p class="hero-subtitle">
+      본 보고서는 ECC 기반 CO 구조와 BPC 연결 레이어의 통합 아키텍처를 분석합니다.
+      표면적으로는 ERP 관리회계(CO-PA 미적용) 구조의 한계처럼 보이나,
+      실제로는 SAP 표준이 제공하지 않는 연결 관리회계 레이어를 자체 구현한 정교한 설계입니다.
+    </p>
+    <div class="verdict-box">
+      <span class="verdict-label">결론</span>
+      <span class="verdict-text">이 시스템은 ERP 마스터 거버넌스 위에서 연결 관리회계를 완결하는 커스텀 엔진이다.<br>설계 수준이 높은 만큼, S/4HANA 전환 시 이 엔진 전체의 호환성 검증이 프로젝트의 핵심 과제가 된다.</span>
+    </div>
+  </div>
+
+  <!-- S1: 전체 아키텍처 -->
+  <section id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">전체 아키텍처 구조</h2>
+    </div>
+    <p class="prose">
+      ERP(ECC)는 <strong>관리회계의 두뇌</strong>로서 모든 마스터와 배부 로직의 원천(Single Source of Truth)을 담당하고,
+      BPC는 그 두뇌를 <strong>연결 결산 레이어까지 연장하는 신경계</strong>로 기능합니다.
+      두 시스템 간의 연계는 단순 데이터 복사가 아닌 메타데이터 수준의 상속 구조입니다.
+    </p>
+
+    <div class="arch-diagram">
+      <!-- ERP Layer -->
+      <div class="arch-layer">
+        <div class="arch-layer-header">
+          <span>ERP (ECC) — Master &amp; Logic Layer</span>
+          <span class="arch-layer-tag">Single Source of Truth</span>
+        </div>
+        <div class="arch-layer-body">
+          <div class="arch-item">
+            <div class="arch-item-label">Chart of Accounts / CoA</div>
+            <div class="arch-item-desc">GL 계정 체계 마스터. BPC 차원 매핑의 기반</div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-label">Cost Center 마스터</div>
+            <div class="arch-item-desc">조직 단위 원가 집계 기준. Channel 배부의 Key</div>
+          </div>
+          <div class="arch-item highlight">
+            <div class="arch-item-label">Channel / Cost Item 맵핑 테이블</div>
+            <div class="arch-item-desc">CC × GL 조합 → Channel / Cost Item 결정 규칙. Z-테이블 관리</div>
+          </div>
+          <div class="arch-item highlight">
+            <div class="arch-item-label">배부 사이클 마스터</div>
+            <div class="arch-item-desc">CCA 배부 Cycle / Segment 정의. CO 팀 수동 트리거로 BPC에 배치 동기화</div>
+          </div>
+          <div class="arch-item highlight">
+            <div class="arch-item-label">SKF 배부적수</div>
+            <div class="arch-item-desc">Statistical Key Figure. 배부 기준값. CO 팀 수동 트리거로 BPC에 배치 동기화</div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-label">CO 배부 실행 결과</div>
+            <div class="arch-item-desc">단위 법인 원가 배부 완료 후 Trial Balance와 함께 인터페이스</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow">
+        <span class="arch-arrow-label">▼ CO 팀 수동 트리거 기반 배치 인터페이스 (마스터 + 로직 + 데이터)</span>
+      </div>
+
+      <!-- BPC Layer -->
+      <div class="arch-layer">
+        <div class="arch-layer-header">
+          <span>BPC 10.1 for Netweaver — Consolidation &amp; Analytics Layer</span>
+          <span class="arch-layer-tag">Logic Inheritance + Execution</span>
+        </div>
+        <div class="arch-layer-body">
+          <div class="arch-item">
+            <div class="arch-item-label">마스터 수신</div>
+            <div class="arch-item-desc">Channel, Cost Item, 맵핑 테이블 — CO 팀 트리거 후 배치 반영</div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-label">로직 수신</div>
+            <div class="arch-item-desc">배부 사이클 마스터 + SKF 배부적수 — CO 팀 트리거 후 배치 수신</div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-label">데이터 수신</div>
+            <div class="arch-item-desc">Trial Balance, CO 배부 결과, GAAP/Lease 조정 항목</div>
+          </div>
+          <div class="arch-item highlight">
+            <div class="arch-item-label">연결조정분 재배부</div>
+            <div class="arch-item-desc">ERP CO와 동일 사이클·SKF 기준으로 연결조정 항목 채널 배부 실행</div>
+          </div>
+          <div class="arch-item highlight">
+            <div class="arch-item-label">지능형 전표 입력 보조</div>
+            <div class="arch-item-desc">더미 멤버 입력 → CC × GL 맵핑 조회 → Channel / Cost Item 자동 채움</div>
+          </div>
+          <div class="arch-item">
+            <div class="arch-item-label">채널별 P&amp;L 완결</div>
+            <div class="arch-item-desc">US GAAP(월) + K-IFRS(분기) 연결 기준 채널 성과 확정</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S2: 설계 철학 -->
+  <section id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">설계 철학의 재해석</h2>
+    </div>
+
+    <div class="philosophy-box">
+      <div class="philosophy-text">
+        ERP는 관리회계의 두뇌, BPC는 그 두뇌를 연결 레이어까지 연장하는 신경계
+      </div>
+      <div class="philosophy-sub">
+        CO-PA를 ERP 내에서 완결하려 했다면 이 아키텍처는 나올 수 없었습니다.
+        ERP를 마스터와 로직의 원천으로만 쓰고, 성과 분석의 완결은 의도적으로 BPC에서 하겠다는
+        <strong>레이어 분리 전략</strong>입니다. 이는 SAP 표준의 한계를 인식한 위에서 내린 설계 판단입니다.
+      </div>
+    </div>
+
+    <p class="prose">
+      초기 구축 시 <strong>컨설팅 미흡 가설은 기각</strong>하는 것이 적절합니다.
+      ECC 환경에서 CO-PA(특히 Costing-based)의 구조적 한계를 인지하고,
+      연결조정 항목의 채널 귀속이라는 요건을 ERP 내에서 해결할 수 없음을 파악한 뒤
+      BPC를 배부 실행 레이어로 선택한 것은 논리적 귀결입니다.
+    </p>
+
+    <p class="prose">
+      <strong>아마존 벤치마킹과의 정합성</strong>도 있습니다. 아마존 역시 ERP를 법적 결산 목적으로만 쓰고,
+      채널·사업부 성과는 자체 BI 레이어에서 관리합니다. 
+      "ERP는 데이터 소스, 성과 분석은 상위 레이어"라는 동일한 철학의 SAP 구현체입니다.
+    </p>
+  </section>
+
+  <!-- S3: 비교 -->
+  <section id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">일반적 BPC 구현 vs. 현 구조</h2>
+    </div>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th class="col-label">구분</th>
+          <th class="col-general">일반적 BPC 구현</th>
+          <th class="col-this">현 구조</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-label">마스터 관리</td>
+          <td class="col-general">BPC 자체 관리 또는 수동 동기화</td>
+          <td class="col-this">ERP Single Source — CO 팀 수동 트리거로 배치 동기화</td>
+        </tr>
+        <tr>
+          <td class="col-label">배부 기준</td>
+          <td class="col-general">BPC 스크립트에 하드코딩</td>
+          <td class="col-this">ERP 사이클·SKF 메타데이터 상속</td>
+        </tr>
+        <tr>
+          <td class="col-label">배부 기준 변경</td>
+          <td class="col-general">ERP + BPC 양쪽 수동 수정 필요</td>
+          <td class="col-this">ERP 수정 후 CO 팀이 트리거 실행 시 BPC 반영 — 트리거 누락 시 불일치 발생</td>
+        </tr>
+        <tr>
+          <td class="col-label">연결조정분 채널 귀속</td>
+          <td class="col-general">불완전 또는 수동 처리</td>
+          <td class="col-this">ERP CO와 동일 기준으로 자동 완결</td>
+        </tr>
+        <tr>
+          <td class="col-label">전표 입력 보조</td>
+          <td class="col-general">없음 — 사용자가 직접 판단 입력</td>
+          <td class="col-this">맵핑 테이블 기반 Channel / Cost Item 자동 채움</td>
+        </tr>
+        <tr>
+          <td class="col-label">기준 일관성 보장</td>
+          <td class="col-general">운영 프로세스 통제에 의존</td>
+          <td class="col-this">운영 프로세스(CO 팀 트리거)에 의존 — 시스템 강제 아님</td>
+        </tr>
+        <tr>
+          <td class="col-label">채널 P&amp;L 완결성</td>
+          <td class="col-general">단위 법인 기준으로 제한</td>
+          <td class="col-this">연결 레이어까지 완전한 채널 성과 확보</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- S4: 핵심 설계 요소 -->
+  <section id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">핵심 설계 요소 분석</h2>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-num">01</div>
+        <div class="insight-title">배부 사이클 마스터 배치 동기화</div>
+        <div class="insight-body">
+          CO 팀의 수동 트리거로 ERP 배부 사이클 마스터를 BPC에 반영합니다.
+          메타데이터 수준 상속 구조로 설계는 정교하나,
+          트리거 실행이 운영 프로세스에 의존하므로
+          누락 시 BPC가 구버전 로직으로 배부를 실행하는 리스크가 존재합니다.
+          트리거 실행 이력의 명시적 관리가 필요합니다.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">02</div>
+        <div class="insight-title">SKF 배부적수 배치 동기화</div>
+        <div class="insight-body">
+          ERP CO 배부와 BPC 재배부가 동일 적수 기준을 공유하는 설계입니다.
+          단, CO 팀 트리거 시점이 기준이므로
+          월 마감 중 SKF 재조정이 발생할 경우
+          트리거를 재실행하지 않으면 BPC 배부 결과와 ERP 간 수치 불일치가 발생할 수 있습니다.
+          마감 프로세스 내 트리거 실행 시점 정의가 중요합니다.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-num">03</div>
+        <div class="insight-title">더미 멤버 → 자동 채움 규칙 엔진</div>
+        <div class="insight-body">
+          연결조정·매뉴얼 전표 입력 시 담당자가 Channel / Cost Item을
+          직접 판단하지 않아도 됩니다. CC × GL 맵핑 테이블이
+          판단을 대체하여 입력 오류를 원천 차단하고,
+          ERP CO와 동일한 맵핑 논리가 수동 전표에도 적용됩니다.
+        </div>
+      </div>
+    </div>
+
+    <p class="prose">
+      세 요소가 결합되어 달성하는 것: <strong>입력 오류 제거 + 기준 일관성 + 운영 효율의 동시 확보.</strong>
+      설계 자체의 완성도는 높으나, <strong>동기화 트리거가 CO 팀의 수동 실행에 의존</strong>한다는 점이
+      구조적 취약점입니다. 시스템이 기준 일관성을 강제하는 것이 아니라 운영 프로세스가 보장해야 하므로,
+      트리거 실행 절차와 이력 관리가 내부 통제의 핵심 요소가 됩니다.
+    </p>
+  </section>
+
+  <!-- S5: 리스크 -->
+  <section id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">S/4HANA 전환 리스크</h2>
+    </div>
+
+    <p class="prose">
+      설계가 정교할수록 전환 충격도 큽니다. 리스크의 본질은 단순한 "인터페이스 테이블 변경"이 아닙니다.
+      <strong>이 관리회계 엔진 전체가 S/4의 새로운 구조 위에서 동일하게 작동할 수 있는가</strong>의 문제입니다.
+    </p>
+
+    <table class="risk-table">
+      <thead>
+        <tr>
+          <th style="width:28%">리스크 영역</th>
+          <th style="width:12%">등급</th>
+          <th>상세 내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cost Item 맵핑 테이블 원천</strong></td>
+          <td><span class="risk-badge risk-high">HIGH</span></td>
+          <td>CC × GL 맵핑 Z-테이블의 GL 키가 ACDOCA 전환 후 CoA 변경으로 깨질 수 있음. 맵핑 키 전체 재검증 필요</td>
+        </tr>
+        <tr>
+          <td><strong>배부 사이클 마스터 연계 오브젝트</strong></td>
+          <td><span class="risk-badge risk-high">HIGH</span></td>
+          <td>KSSK/KSSR 계열 테이블 구조가 S/4에서 변경될 경우 메타데이터 상속 구조 전체 재설계. Compatibility View 커버 여부 Deloitte 확인 필수</td>
+        </tr>
+        <tr>
+          <td><strong>더미 멤버 자동 채움 트리거</strong></td>
+          <td><span class="risk-badge risk-high">HIGH</span></td>
+          <td>구현 ABAP Exit 또는 BPC Script Logic이 Type B/C 인터페이스와 연결된 경우 FAGLFLEXA → ACDOCA 전환으로 직접 파괴 가능</td>
+        </tr>
+        <tr>
+          <td><strong>FAGLFLEXA → ACDOCA 전환</strong></td>
+          <td><span class="risk-badge risk-high">HIGH</span></td>
+          <td>Type B/C 인터페이스(BPC Dimension/Cube 직접 쓰기) 전반에 영향. Compatibility View 한계로 커스텀 오브젝트 파괴 가능성 상존</td>
+        </tr>
+        <tr>
+          <td><strong>SKF 배부적수 원천 테이블</strong></td>
+          <td><span class="risk-badge risk-med">MED</span></td>
+          <td>CSKSF 등 SKF 관련 테이블의 S/4 구조 변경 여부 확인. 인터페이스 오브젝트 재설계 범위에 포함 필요</td>
+        </tr>
+        <tr>
+          <td><strong>동기화 누락 및 이력 관리 공백</strong></td>
+          <td><span class="risk-badge risk-med">MED</span></td>
+          <td>CO 팀 트리거 미실행 또는 지연 시 BPC가 구버전 마스터·로직으로 배부 실행. 어느 시점에 어떤 버전이 반영되었는지 시스템 자동 기록 없어 감사 시 운영 로그에 의존</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- S6: 체크리스트 -->
+  <section id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">AS-IS 문서화 우선 검증 항목</h2>
+    </div>
+    <p class="prose">
+      Deloitte가 이 구조의 깊이를 제대로 파악하고 있는지 확인이 필요합니다.
+      아래 항목들은 AS-IS 문서화에서 <strong>가장 먼저 확인하고 기록해야 할 사항</strong>들입니다.
+    </p>
+
+    <div class="checklist">
+      <div class="checklist-title">Priority Verification Checklist</div>
+
+      <div class="checklist-item">
+        <span class="check-idx">01</span>
+        <div class="check-content">
+          <div class="check-title">배부 사이클 마스터 연계 ABAP 오브젝트 식별</div>
+          <div class="check-desc">KSSK/KSSR 계열 또는 커스텀 Z-테이블 기반 여부 확인. S/4에서 해당 테이블 구조 변경 범위와 Compatibility View 커버 여부 Deloitte와 명시적 확인</div>
+        </div>
+        <span class="check-tag">TYPE B/C</span>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-idx">02</span>
+        <div class="check-content">
+          <div class="check-title">CO 팀 트리거 실행 절차 및 이력 관리 현황 문서화</div>
+          <div class="check-desc">월 마감 프로세스 내 트리거 실행 시점 정의 여부 확인. 트리거 실행 로그 보존 방식 및 미실행 시 탐지 체계 유무 파악. 감사 대응을 위한 동기화 이력 관리 방안 수립 필요</div>
+        </div>
+        <span class="check-tag">GOVERNANCE</span>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-idx">03</span>
+          <div class="check-desc">CC × GL → Channel / Cost Item 맵핑 키 전체 목록화. ACDOCA 전환 후 GL 계정 체계 변경이 맵핑 키에 미치는 영향 사전 분석</div>
+        </div>
+        <span class="check-tag">TYPE A</span>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-idx">04</span>
+        <div class="check-content">
+          <div class="check-title">더미 멤버 자동 채움 로직 트리거 확인</div>
+          <div class="check-desc">BPC Script Logic인지 ABAP User Exit인지 구분. 어떤 이벤트에 의존하는지, Type B/C 인터페이스와의 연결 관계 명확히 문서화</div>
+        </div>
+        <span class="check-tag">TYPE B/C</span>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-idx">05</span>
+        <div class="check-content">
+          <div class="check-title">SKF 배부적수 원천 테이블 및 인터페이스 오브젝트</div>
+          <div class="check-desc">CSKSF 등 SKF 관련 테이블의 S/4 변경 여부 확인. 인터페이스 오브젝트를 Type A/B/C 분류에 포함하여 리스크 매트릭스에 반영</div>
+        </div>
+        <span class="check-tag">TYPE A</span>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-idx">06</span>
+        <div class="check-content">
+          <div class="check-title">Deloitte S/4 전환 범위에 이 아키텍처 포함 여부 확인</div>
+          <div class="check-desc">단순 ERP 전환이 아닌 이 관리회계 엔진 전체의 재구축 필요성을 Deloitte 측이 인식하고 있는지 공식 확인. 미인식 시 별도 요건 제기 필요</div>
+        </div>
+        <span class="check-tag">GOVERNANCE</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-left">BPC 연결 관리회계 아키텍처 — 구조 진단 보고서</span>
+    <span class="footer-right">INTERNAL · CONFIDENTIAL · FOR REVIEW PURPOSES ONLY</span>
+  </div>
+</footer>
+
+<script>
+  // Intersection Observer for scroll animations
+  const sections = document.querySelectorAll('section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08 });
+  sections.forEach(s => observer.observe(s));
+
+  // TOC active state
+  const tocItems = document.querySelectorAll('.toc-item');
+  const sectionEls = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sectionEls.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 130) current = sec.id;
+    });
+    tocItems.forEach(item => {
+      item.style.color = '';
+      item.style.borderBottomColor = '';
+      item.style.background = '';
+      if (item.getAttribute('href') === '#' + current) {
+        item.style.color = '#003366';
+        item.style.borderBottomColor = '#003366';
+        item.style.background = '#e8eef5';
+      }
+    });
+  });
+</script>
+</body>
+</html>
