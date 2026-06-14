@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제약·바이오 LOB — ERP 구축 실전 가이드 | BAC Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #003366;
+  --navy-light: #e8eef5;
+  --bg: #f0f3f8;
+  --white: #ffffff;
+  --border: #d0d8e4;
+  --text: #1a1a2e;
+  --muted: #5a6a7e;
+  --warn-bg: #fff8e6;
+  --warn-border: #e6a817;
+  --correct-bg: #e8f5e9;
+  --correct-border: #388e3c;
+  --wrong-bg: #fdecea;
+  --wrong-border: #c62828;
+  --gap: 20px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; color: var(--text); line-height: 1.75; }
+
+/* NAV */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--navy); display: flex; overflow-x: auto;
+  scrollbar-width: none; border-bottom: 2px solid #001f44;
+}
+.sticky-nav::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex-shrink: 0; padding: 13px 20px; color: rgba(255,255,255,0.65);
+  font-size: 13px; font-weight: 500; cursor: pointer; border: none;
+  background: none; white-space: nowrap; transition: all 0.2s; border-bottom: 3px solid transparent;
+}
+.nav-tab:hover { color: #fff; }
+.nav-tab.active { color: #fff; border-bottom-color: #7eb8f7; }
+
+/* HERO */
+.hero {
+  background: var(--navy); padding: 64px 48px 52px;
+  border-bottom: 4px solid #001f44;
+}
+.hero-eyebrow { color: #7eb8f7; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+.hero h1 { font-family: 'DM Serif Display', serif; font-size: 42px; color: #fff; line-height: 1.2; margin-bottom: 20px; }
+.hero p { color: rgba(255,255,255,0.72); font-size: 16px; max-width: 680px; line-height: 1.8; }
+.hero-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+.badge { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }
+
+/* MAIN */
+.main { max-width: 1060px; margin: 0 auto; padding: 0 32px 80px; }
+
+/* SECTION */
+.section { padding-top: 56px; }
+.section-label { color: var(--navy); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.section h2 { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--text); margin-bottom: 6px; line-height: 1.3; }
+.section-subtitle { color: var(--muted); font-size: 16px; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+
+/* CARDS */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 28px 32px; margin-bottom: var(--gap); }
+.card h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.card h3 .icon { font-size: 18px; }
+.card p { margin-bottom: 10px; color: var(--text); }
+.card p:last-child { margin-bottom: 0; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-bottom: var(--gap); }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); margin-bottom: var(--gap); }
+@media(max-width:720px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+/* CALLOUT */
+.callout { border-radius: 8px; padding: 20px 24px; margin-bottom: var(--gap); border-left: 4px solid; }
+.callout.navy { background: var(--navy-light); border-color: var(--navy); }
+.callout.warn { background: var(--warn-bg); border-color: var(--warn-border); }
+.callout.correct { background: var(--correct-bg); border-color: var(--correct-border); }
+.callout.wrong { background: var(--wrong-bg); border-color: var(--wrong-border); }
+.callout-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.callout.navy .callout-title { color: var(--navy); }
+.callout.warn .callout-title { color: #7a5400; }
+.callout.correct .callout-title { color: #1b5e20; }
+.callout.wrong .callout-title { color: #b71c1c; }
+
+/* FLOW DIAGRAM */
+.flow { display: flex; align-items: stretch; gap: 0; margin-bottom: var(--gap); flex-wrap: wrap; }
+.flow-step { flex: 1; min-width: 120px; background: var(--white); border: 1px solid var(--border); padding: 18px 14px; text-align: center; position: relative; }
+.flow-step:not(:last-child)::after {
+  content: '→'; position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+  font-size: 18px; color: var(--navy); z-index: 1; background: var(--bg); padding: 0 2px;
+}
+.flow-step .fs-num { font-size: 11px; font-weight: 700; color: var(--navy); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+.flow-step .fs-label { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.flow-step .fs-sub { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.flow-step.highlight { background: var(--navy); border-color: var(--navy); }
+.flow-step.highlight .fs-num, .flow-step.highlight .fs-label, .flow-step.highlight .fs-sub { color: #fff; }
+.flow-step.highlight .fs-sub { color: rgba(255,255,255,0.72); }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; margin-bottom: var(--gap); }
+table { width: 100%; border-collapse: collapse; background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-size: 14px; }
+th { background: var(--navy); color: #fff; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 13px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f7f9fc; }
+td strong { color: var(--navy); }
+
+/* DRILL TOGGLE */
+.drill { background: var(--white); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+.drill-header { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 15px; }
+.drill-header:hover { background: #f7f9fc; }
+.drill-arrow { font-size: 13px; color: var(--muted); transition: transform 0.25s; }
+.drill.open .drill-arrow { transform: rotate(180deg); }
+.drill-body { display: none; padding: 4px 20px 20px; border-top: 1px solid var(--border); background: #fbfcfe; font-size: 14px; color: var(--text); line-height: 1.8; }
+.drill.open .drill-body { display: block; }
+
+/* FORMULA BOX */
+.formula-box { background: #f7f9fc; border: 1px solid var(--border); border-radius: 6px; padding: 18px 24px; font-family: 'JetBrains Mono', 'Noto Sans KR', monospace; font-size: 14px; margin-bottom: var(--gap); line-height: 2; }
+.formula-box .formula-title { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.formula-box .eq { color: var(--navy); font-weight: 700; }
+
+/* QUIZ */
+.quiz { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 28px 32px; margin-bottom: var(--gap); }
+.quiz-q { font-weight: 700; font-size: 15px; margin-bottom: 20px; }
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-opt { border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+.quiz-opt:hover { border-color: var(--navy); background: var(--navy-light); }
+.quiz-opt.correct { background: var(--correct-bg); border-color: var(--correct-border); color: #1b5e20; font-weight: 600; }
+.quiz-opt.wrong { background: var(--wrong-bg); border-color: var(--wrong-border); color: #b71c1c; }
+.quiz-feedback { margin-top: 16px; font-size: 14px; padding: 12px 16px; border-radius: 6px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok { background: var(--correct-bg); color: #1b5e20; }
+.quiz-feedback.ng { background: var(--wrong-bg); color: #b71c1c; }
+
+/* CHECKLIST */
+.checklist { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 24px 28px; margin-bottom: var(--gap); }
+.checklist-title { font-weight: 700; font-size: 15px; color: var(--navy); margin-bottom: 16px; }
+.check-progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 20px; }
+.check-progress-fill { height: 100%; background: var(--navy); border-radius: 3px; transition: width 0.4s; }
+.check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f3f8; cursor: pointer; }
+.check-item:last-child { border-bottom: none; }
+.check-box { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.check-item.checked .check-box { background: var(--navy); border-color: var(--navy); color: #fff; font-size: 12px; }
+.check-item.checked .check-text { text-decoration: line-through; color: var(--muted); }
+.check-text { font-size: 14px; line-height: 1.6; }
+
+/* ARCH DIAGRAM */
+.arch { display: grid; gap: 12px; margin-bottom: var(--gap); }
+.arch-row { display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: stretch; }
+.arch-label { background: var(--navy); color: #fff; font-size: 12px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; border-radius: 6px; padding: 10px; line-height: 1.4; }
+.arch-cells { display: flex; gap: 10px; }
+.arch-cell { flex: 1; background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; font-size: 13px; text-align: center; }
+.arch-cell strong { display: block; font-size: 13px; color: var(--navy); margin-bottom: 3px; }
+.arch-cell span { font-size: 11px; color: var(--muted); }
+.arch-cell.highlight-cell { border-color: var(--navy); background: var(--navy-light); }
+
+/* HIGHLIGHT BOX */
+.highlight-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); margin-bottom: var(--gap); }
+@media(max-width:720px) { .highlight-row { grid-template-columns: 1fr; } }
+.hl-box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 24px; text-align: center; }
+.hl-box .hl-num { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--navy); display: block; margin-bottom: 4px; }
+.hl-box .hl-label { font-size: 13px; color: var(--muted); }
+
+/* SUMMARY STRIP */
+.summary-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin-bottom: var(--gap); }
+@media(max-width:720px) { .summary-strip { grid-template-columns: 1fr 1fr; } }
+.ss-item { background: var(--navy); color: #fff; border-radius: 8px; padding: 20px; text-align: center; }
+.ss-item .ss-icon { font-size: 24px; margin-bottom: 8px; }
+.ss-item .ss-text { font-size: 13px; font-weight: 500; line-height: 1.4; }
+
+/* DIVIDER */
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0 0; }
+
+/* TAG */
+.tag { display: inline-block; background: var(--navy-light); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="sticky-nav" id="mainNav">
+  <button class="nav-tab active" onclick="scrollToSection('s1',this)">① 산업 구조</button>
+  <button class="nav-tab" onclick="scrollToSection('s2',this)">② GMP 규제</button>
+  <button class="nav-tab" onclick="scrollToSection('s3',this)">③ 역가 BOM</button>
+  <button class="nav-tab" onclick="scrollToSection('s4',this)">④ Batch 원가</button>
+  <button class="nav-tab" onclick="scrollToSection('s5',this)">⑤ IT 생태계</button>
+  <button class="nav-tab" onclick="scrollToSection('s6',this)">⑥ SAP 구축</button>
+  <button class="nav-tab" onclick="scrollToSection('s7',this)">⑦ 사업계획</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">06 LOB Deep-Dive · 제약·바이오</div>
+  <h1>제약·바이오 ERP,<br>규제가 시스템을 설계한다</h1>
+  <p>GMP 컴플라이언스, 역가(Potency) BOM, Batch 원가, MES·LIMS 연계까지 — 타 LOB와 근본적으로 다른 제약·바이오 ERP 구축의 핵심 원리를 단계별로 이해합니다.</p>
+  <div class="hero-badges">
+    <span class="badge">GMP / 21 CFR Part 11</span>
+    <span class="badge">역가(Potency) BOM</span>
+    <span class="badge">SAP PP-PI</span>
+    <span class="badge">Batch 원가계산</span>
+    <span class="badge">MES · LIMS 연계</span>
+    <span class="badge">SAC-P 사업계획</span>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════ SECTION 1 ═══════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-label">Section 01</div>
+  <h2>제약·바이오 산업 구조와 밸류체인</h2>
+  <p class="section-subtitle">완제·원료·바이오·CMO 유형 분류와 R&D→허가→생산→유통의 전체 흐름을 이해한다</p>
+
+  <div class="card">
+    <h3><span class="icon">🏭</span>제약·바이오 기업의 4가지 유형</h3>
+    <p>ERP 구축 범위와 프로세스 복잡도는 기업 유형에 따라 근본적으로 달라집니다. 첫 번째 질문은 항상 "이 회사가 어떤 유형인가?"여야 합니다.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="icon">💊</span>완제의약품사 (Finished Dose)</h3>
+      <p>원료를 구매하여 정제·캡슐·주사제 등 최종 제형으로 제조·판매. <strong>영업/마케팅·허가관리·유통 프로세스</strong>가 핵심.</p>
+      <p><span class="tag">예시</span> 한미약품, 유한양행, 종근당</p>
+      <p>ERP 범위: SD(영업), MM(구매), PP-PI(생산), QM(품질), FI/CO(원가)</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🧪</span>원료의약품사 (API Manufacturer)</h3>
+      <p>Active Pharmaceutical Ingredient(API) 합성·제조. B2B 판매 중심으로 <strong>배치 추적성(Traceability)과 CoA(성적서) 관리</strong>가 핵심.</p>
+      <p><span class="tag">예시</span> 일동제약 API부문, 글로벌 CDMO 일부</p>
+      <p>ERP 범위: PP-PI, QM, MM, 수출통관 (GTS)</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🔬</span>바이오의약품사 (Biopharmaceutical)</h3>
+      <p>세포·단백질·항체 기반 바이오로직스 제조. <strong>배양 공정 조건 관리, 역가(Potency) 시험, Cold Chain</strong>이 제조 원가의 핵심 변수.</p>
+      <p><span class="tag">예시</span> 삼성바이오로직스, 셀트리온</p>
+      <p>ERP 범위: PP-PI + MES 연계 필수, LIMS 연동 복잡</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🤝</span>CMO/CDMO (위·수탁 제조)</h3>
+      <p>의뢰사 제품을 위탁 생산. <strong>다품목 다고객 Batch 분리, 고객사 BOM/레시피 격리 관리</strong>가 핵심 과제.</p>
+      <p><span class="tag">예시</span> 삼성바이오로직스(이중), 롯데바이오로직스</p>
+      <p>ERP 범위: 고객별 가격구조(SD), 원가센터 분리, 기밀성 권한 설계</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🔄</span>제약·바이오 밸류체인 전체 흐름</h3>
+    <p>제약 ERP의 특이점은 <strong>R&D 단계부터 규제 허가 데이터가 생산 BOM에 직결</strong>된다는 것입니다. 허가 변경 → BOM 변경 → 생산 오더 변경이 규제 기관 승인 없이는 불가합니다.</p>
+  </div>
+
+  <div class="flow" style="margin-bottom:20px">
+    <div class="flow-step">
+      <div class="fs-num">Phase 1–3</div>
+      <div class="fs-label">R&D · 임상</div>
+      <div class="fs-sub">후보물질 발굴<br>임상시험</div>
+    </div>
+    <div class="flow-step highlight">
+      <div class="fs-num">NDA/ANDA</div>
+      <div class="fs-label">허가 신청</div>
+      <div class="fs-sub">식약처/FDA<br>제조법 등록</div>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">GMP 생산</div>
+      <div class="fs-label">Batch 제조</div>
+      <div class="fs-sub">레시피 기반<br>공정 실행</div>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">QC 시험</div>
+      <div class="fs-label">품질 검사</div>
+      <div class="fs-sub">역가·순도<br>미생물 시험</div>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">출하</div>
+      <div class="fs-label">QP 출하 승인</div>
+      <div class="fs-sub">Batch Record<br>최종 검토</div>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">유통</div>
+      <div class="fs-label">판매 · 유통</div>
+      <div class="fs-sub">도매/약국<br>병원 납품</div>
+    </div>
+  </div>
+
+  <div class="callout navy">
+    <div class="callout-title">📌 컨설턴트 관점 핵심</div>
+    허가 신청 단계에서 등록된 <strong>제조법(Manufacturing Process)</strong>이 ERP의 Master Recipe로 전환됩니다. 이 데이터가 곧 BOM이자 작업지시의 법적 근거입니다. 변경에는 규제기관 승인이 필요하므로, <strong>ERP BOM의 버전 관리 = 규제 컴플라이언스</strong>입니다.
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🌏</span>글로벌 규제기관과 ERP 설계의 연결고리</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>규제기관</th><th>주요 규정</th><th>ERP 설계 영향</th></tr>
+        <tr><td><strong>식약처 (MFDS)</strong></td><td>의약품 제조 및 품질관리기준 (KGMP)</td><td>Batch Record 전자화, 전자서명 요건</td></tr>
+        <tr><td><strong>FDA (미국)</strong></td><td>21 CFR Part 11 / Part 211</td><td>Audit Trail, Electronic Signature, Data Integrity</td></tr>
+        <tr><td><strong>EMA (유럽)</strong></td><td>EU GMP Annex 11</td><td>시스템 검증(CSV/CSA), 접근권한 로그</td></tr>
+        <tr><td><strong>ICH</strong></td><td>Q7/Q10 (품질시스템)</td><td>CAPA, Deviation, Change Control 워크플로우</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════ SECTION 2 ═══════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-label">Section 02</div>
+  <h2>GMP란 무엇인가 — 규제가 ERP를 지배한다</h2>
+  <p class="section-subtitle">GMP 핵심 원칙을 이해하고, ERP가 왜 GMP Compliant해야 하는지 논리적으로 설명할 수 있다</p>
+
+  <div class="callout warn">
+    <div class="callout-title">⚠️ 왜 제약 ERP가 어려운가</div>
+    일반 제조업 ERP는 "생산을 효율적으로 관리"가 목적입니다. 제약 ERP는 여기에 <strong>"생산의 모든 과정을 법적으로 입증"</strong>이라는 조건이 추가됩니다. 이 차이가 설계 복잡도를 두 배 이상 높입니다.
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🏛️</span>GMP (Good Manufacturing Practice) 핵심 원칙</h3>
+    <p>GMP는 의약품이 <strong>의도된 목적에 맞게, 일관된 품질로, 안전하게</strong> 제조되도록 보장하는 규제 체계입니다. ERP 관점에서 3가지 원칙이 가장 중요합니다.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon">📋</span>Batch Record</h3>
+      <p>모든 제조 활동의 <strong>완전한 기록</strong>. 누가, 언제, 어떤 원료로, 어떤 공정 조건에서 생산했는지를 증명. ERP에서 Process Order + PI Sheet로 구현.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🔍</span>Audit Trail</h3>
+      <p>모든 데이터 <strong>입력·수정·삭제의 이력</strong> 자동 기록. 사후 수정이 불가하거나 추적 가능해야 함. 21 CFR Part 11의 핵심 요건.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">✍️</span>Electronic Signature</h3>
+      <p>종이 서명을 대체하는 <strong>검증된 전자서명</strong>. 단순 체크박스 불가 — ID/PW 재입력 또는 생체인증 수준의 인증이 필요.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🖥️</span>CSV vs CSA — ERP 시스템 검증의 패러다임 전환</h3>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>CSV (Computerized System Validation)</h3>
+      <p>전통적 접근법. 시스템의 모든 기능을 <strong>사전 정의된 테스트 스크립트</strong>로 검증. 방대한 문서화 부담. SAP 표준 기능 변경 시마다 재검증 필요.</p>
+    </div>
+    <div class="card">
+      <h3>CSA (Computer Software Assurance)</h3>
+      <p>FDA 2022 권고 기반의 현대적 접근. <strong>리스크 기반(Risk-based)</strong>으로 검증 범위를 설정. 비즈니스 리스크가 높은 기능에 집중하여 효율화.</p>
+      <p>S/4HANA 구축 시 CSA 접근이 현실적으로 유리.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📊</span>21 CFR Part 11 — ERP 설계 체크리스트</h3>
+    <p>미국 FDA의 전자기록·전자서명 규정. 한국 식약처 KFDA에서도 유사 기준 적용.</p>
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table>
+        <tr><th>요건</th><th>내용</th><th>SAP 구현 방법</th></tr>
+        <tr><td><strong>Audit Trail</strong></td><td>생성·수정·삭제 모든 이력 자동 기록</td><td>Change Documents, Object Change Log 활성화</td></tr>
+        <tr><td><strong>전자서명 연결</strong></td><td>서명 기록이 해당 전자문서에 영구 연결</td><td>Digital Signature (QM/PP 통합)</td></tr>
+        <tr><td><strong>접근권한 제어</strong></td><td>권한 있는 자만 특정 기능 수행 가능</td><td>SAP Authorization Object 설계</td></tr>
+        <tr><td><strong>System Access 로그</strong></td><td>로그인/로그아웃 및 실패 기록 유지</td><td>Security Audit Log 활성화</td></tr>
+        <tr><td><strong>데이터 복구</strong></td><td>데이터 손실 방지 및 복구 절차</td><td>HANA Backup, Archive Strategy</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="drill">
+    <div class="drill-header" onclick="toggleDrill(this)">
+      <span>💡 왜 SAP 표준 설정 변경이 규제 이슈가 되는가?</span>
+      <span class="drill-arrow">▼</span>
+    </div>
+    <div class="drill-body">
+      <p>CSV/CSA 관점에서 SAP 시스템은 <strong>"검증된 상태(Validated State)"</strong>로 유지되어야 합니다. 설정(Configuration) 또는 커스텀 개발(ABAP)을 변경하면, 해당 변경이 기존 검증을 무효화할 수 있습니다.</p>
+      <p style="margin-top:10px">따라서 제약 고객사는 <strong>Change Control 절차</strong>를 통해 모든 시스템 변경을 관리합니다. ERP 구축 시 "이 변경이 Change Control 대상인가?"를 항상 Quality 팀과 협의해야 합니다.</p>
+      <p style="margin-top:10px">컨설턴트 실무 팁: SAP 표준 기능의 Configuration 변경은 낮은 리스크, ABAP 커스텀 개발은 높은 리스크로 분류됩니다. 가능한 표준 기능 활용을 우선하는 이유가 규제 리스크 최소화에 있습니다.</p>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-q">Q. GMP 규제에서 Audit Trail이 요구하는 것은 무엇인가?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">① 생산 수량과 원가만 기록하면 충분하다</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">② 최종 결과 데이터만 유지하면 된다</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, true)">③ 데이터의 생성·수정·삭제 모든 이력을 자동으로 기록해야 한다</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">④ 품질 검사 결과만 전자서명으로 승인하면 된다</div>
+    </div>
+    <div class="quiz-feedback">
+      <strong>정답: ③</strong> — Audit Trail은 원본 데이터가 아니라 모든 변경 이력을 추적합니다. 누가, 언제, 무엇을, 왜 변경했는지가 증명 가능해야 FDA 실사를 통과할 수 있습니다.
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════ SECTION 3 ═══════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-label">Section 03</div>
+  <h2>제약 BOM의 본질 — 역가(Potency)와 수율</h2>
+  <p class="section-subtitle">일반 BOM과 역가 BOM의 구조적 차이를 이해하고, 역산 로직과 수율 처리를 설명할 수 있다</p>
+
+  <div class="callout navy">
+    <div class="callout-title">📌 역가(Potency)란 무엇인가</div>
+    역가(力價, Potency)는 원료 의약품이 함유하고 있는 <strong>유효성분(Active Ingredient)의 실제 함량 비율</strong>입니다. 같은 원료라도 로트(Lot)마다 역가가 다를 수 있으며, 이것이 일반 제조업 BOM과 근본적으로 다른 이유입니다.
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="icon">⚙️</span>일반 제조업 BOM</h3>
+      <p>철판 2kg → 프레임 1개. 투입량이 고정입니다. 원자재의 "순도"나 "역가"를 고려할 필요가 없습니다.</p>
+      <div class="formula-box" style="margin-top:14px">
+        <div class="formula-title">Fixed BOM</div>
+        <span class="eq">투입량 = 명세서 고정값</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🧬</span>제약 역가 BOM</h3>
+      <p>API 100mg 확보하려면? 역가 95%짜리 원료라면 <strong>105.26mg</strong>이 필요합니다. 역가 98%짜리라면 <strong>102.04mg</strong>이 필요합니다. 투입량이 로트마다 변동합니다.</p>
+      <div class="formula-box" style="margin-top:14px">
+        <div class="formula-title">Potency-Based BOM</div>
+        <span class="eq">투입량 = 목표 API 함량 ÷ 역가(%)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📐</span>역가 BOM 계산 사례 — 단계별 이해</h3>
+    <p>아목시실린 캡슐 250mg을 1배치(100,000캡슐) 생산한다고 가정합니다.</p>
+    <div class="tbl-wrap" style="margin-top:16px">
+      <table>
+        <tr><th>항목</th><th>값</th><th>비고</th></tr>
+        <tr><td>목표 API 함량</td><td>250mg/캡슐 × 100,000 = <strong>25,000,000mg (25kg)</strong></td><td>허가된 제조법 기준</td></tr>
+        <tr><td>원료 API 역가 (이번 로트)</td><td><strong>96.5%</strong></td><td>LIMS 시험 결과</td></tr>
+        <tr><td>실제 투입 원료량</td><td>25kg ÷ 0.965 = <strong>25.907kg</strong></td><td>ERP 자동 역산</td></tr>
+        <tr><td>수율 (Yield) 80% 적용</td><td>25.907kg ÷ 0.80 = <strong>32.384kg</strong> 확보 필요</td><td>공정 손실 반영</td></tr>
+      </table>
+    </div>
+    <div class="callout warn" style="margin-top:16px; margin-bottom:0">
+      <div class="callout-title">⚠️ ERP 구축 핵심 이슈</div>
+      역가 값은 <strong>LIMS(실험실 정보 시스템)에서 관리</strong>됩니다. ERP가 이 값을 실시간으로 받아 BOM 투입량을 자동 계산해야 합니다. LIMS↔ERP 인터페이스 설계가 구축의 핵심 난제입니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🏗️</span>3단계 BOM 구조 — 원료·반제품·완제품</h3>
+    <p>제약 BOM은 단층이 아닙니다. 원료(API+부형제) → 반제품(Bulk) → 완제품(Finished Dose)의 3단계 구조를 가지며, 각 단계마다 역가와 수율이 적용됩니다.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="fs-num">Level 3</div>
+      <div class="fs-label">원료 (API)</div>
+      <div class="fs-sub">역가 시험 후<br>투입량 역산</div>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">Level 3</div>
+      <div class="fs-label">부형제</div>
+      <div class="fs-sub">Filler, Binder,<br>Lubricant 등</div>
+    </div>
+    <div class="flow-step highlight">
+      <div class="fs-num">Level 2</div>
+      <div class="fs-label">반제품 (Bulk)</div>
+      <div class="fs-sub">혼합·과립·코팅<br>수율 적용</div>
+    </div>
+    <div class="flow-step">
+      <div class="fs-num">Level 1</div>
+      <div class="fs-label">포장재</div>
+      <div class="fs-sub">PTP 블리스터<br>라벨·박스</div>
+    </div>
+    <div class="flow-step highlight">
+      <div class="fs-num">Level 0</div>
+      <div class="fs-label">완제품</div>
+      <div class="fs-sub">허가된 규격<br>출하 판정</div>
+    </div>
+  </div>
+
+  <div class="drill">
+    <div class="drill-header" onclick="toggleDrill(this)">
+      <span>💡 역가 기준(Potency Basis) — As-Is, 건조기준, 무수기준의 차이</span>
+      <span class="drill-arrow">▼</span>
+    </div>
+    <div class="drill-body">
+      <p><strong>As-Is (현재 상태 기준):</strong> 수분 포함 그대로의 실제 역가. 로트 수령 즉시 계량·재고 관리에 사용. 수분 함량에 따라 배치 간 편차 발생.</p>
+      <p style="margin-top:10px"><strong>건조기준 (Dried Basis):</strong> LOD(건조감량) 보정 후 역가. 수분의 영향 제거. 규격서 작성에 주로 사용.</p>
+      <p style="margin-top:10px"><strong>무수기준 (Anhydrous Basis):</strong> 수분 및 결정수 모두 제외. 항생제 등 결정수 변동이 큰 원료에 적용.</p>
+      <p style="margin-top:10px"><strong>ERP 설계 시사점:</strong> 레시피와 LIMS 역가 보고의 기준이 일치해야 합니다. 레시피는 건조기준, LIMS는 As-Is로 보고한다면 시스템이 자동 변환 로직을 보유하거나 불일치를 명시적으로 표시해야 합니다. 이 설계 누락이 배치 과다/과소 투입 오류로 이어집니다.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📉</span>수율(Yield)과 공정손실 — BOM에 반영하는 방법</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>수율 유형</th><th>정의</th><th>SAP 설정</th></tr>
+        <tr><td><strong>조작 수율</strong></td><td>혼합·과립 공정에서의 물리적 손실</td><td>BOM Component Scrap (%)</td></tr>
+        <tr><td><strong>Assembly Scrap</strong></td><td>완성품 기준 총 수율 역산</td><td>Material Master Assembly Scrap</td></tr>
+        <tr><td><strong>공정 손실</strong></td><td>증발·잔류·샘플링으로 인한 손실</td><td>Operation Scrap in Routing</td></tr>
+        <tr><td><strong>재작업(Rework)</strong></td><td>규격 미달 반제품 재처리</td><td>별도 Process Order + Rework BOM</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-q">Q. 역가 95%인 API 원료로 순수 API 200mg을 확보하려면 몇 mg의 원료가 필요한가?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">① 190mg</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">② 200mg</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, true)">③ 210.5mg</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">④ 205mg</div>
+    </div>
+    <div class="quiz-feedback">
+      <strong>정답: ③</strong> — 200mg ÷ 0.95 = 210.526mg. 역가가 낮을수록 더 많은 원료를 투입해야 합니다. 이 계산이 배치마다 자동으로 이루어져야 하는 것이 제약 ERP BOM의 핵심입니다.
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════ SECTION 4 ═══════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-label">Section 04</div>
+  <h2>Batch 생산과 원가의 특수성</h2>
+  <p class="section-subtitle">Batch 단위 원가계산 구조와 유효기간·반품 등 제약 특유의 원가 이슈를 설명할 수 있다</p>
+
+  <div class="card">
+    <h3><span class="icon">⚗️</span>왜 "Batch"가 원가의 기본 단위인가</h3>
+    <p>일반 제조업은 <strong>생산수량 × 단위원가</strong>로 원가를 산출합니다. 제약은 <strong>Batch(배치) 전체를 하나의 원가 객체</strong>로 관리합니다. 하나의 배치 안의 제품들은 동일 원가를 공유합니다.</p>
+    <p>이유: GMP에서 한 배치는 동일 조건에서 제조된 균질한 단위입니다. 배치 내 개별 단위를 별도 원가 객체로 분리하는 것은 규제상 의미도 없고 실무적으로도 불가합니다.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="hl-box">
+      <span class="hl-num">1 Batch</span>
+      <span class="hl-label">= 1개의 원가 집계 단위</span>
+    </div>
+    <div class="hl-box">
+      <span class="hl-num">역가·수율</span>
+      <span class="hl-label">변동에 따라 원가도 배치마다 상이</span>
+    </div>
+    <div class="hl-box">
+      <span class="hl-num">불합격 배치</span>
+      <span class="hl-label">= 전액 폐기 또는 재작업 원가 추가</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">💰</span>Batch 원가계산 구조 — 제약 특유의 원가 항목</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>원가 항목</th><th>특수성</th><th>SAP 처리</th></tr>
+        <tr><td><strong>원료비 (API)</strong></td><td>역가 기반 가변 투입량 → 배치마다 단가 상이</td><td>Actual Cost (이동평균 or S.Price)</td></tr>
+        <tr><td><strong>공정 손실</strong></td><td>허용 수율 범위 내 손실은 정상 원가 산입</td><td>Scrap Qty → 원가 흡수</td></tr>
+        <tr><td><strong>QC 시험비</strong></td><td>배치별 필수 시험 비용 (LIMS 연동)</td><td>Activity Confirmation (QM)</td></tr>
+        <tr><td><strong>Cold Chain 비용</strong></td><td>냉장/냉동 보관·운송 조건 의약품</td><td>별도 원가센터 또는 활동유형</td></tr>
+        <tr><td><strong>불합격 배치 손실</strong></td><td>전량 폐기 시 당기 비용 처리</td><td>Variance: Scrap Variance</td></tr>
+        <tr><td><strong>재작업(Rework) 비용</strong></td><td>재처리 오더의 원가 → 완제품으로 재집계</td><td>Rework Process Order (별도 BOM)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📦</span>유효기간(Shelf Life)과 재고 관리의 특수성</h3>
+    <p>제약 재고는 단순히 "있다/없다"가 아닙니다. <strong>유효기간, 보관 조건, Batch 상태(합격/보류/불합격)</strong>가 재고 가용성을 결정합니다.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="icon">🗓️</span>SLED (Shelf Life Expiration Date) 관리</h3>
+      <p>SAP Batch Management + Shelf Life 설정으로 구현. 핵심 이슈:</p>
+      <p>• <strong>Standard MRP의 한계</strong>: 기본 MRP는 유효기간 만료 예정 배치를 가용재고로 간주. 계획 시점에 충분해 보이다가 실행 시점에 만료 배치가 되는 "Chaos" 발생</p>
+      <p>• <strong>해결책</strong>: S/4HANA PPDS의 특성 기반 계획(Characteristics-Based Planning) 또는 IBP 연동</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🌡️</span>보관 조건과 재고 분류</h3>
+      <p>동일 품목이라도 보관 조건에 따라 다른 재고로 관리해야 합니다:</p>
+      <p>• 상온 (15~25°C) / 냉장 (2~8°C) / 냉동 (-20°C 이하) / 초냉동 (-70°C)</p>
+      <p>• SAP Storage Location + Warehouse Management 설계 시 온도 구역 분리 필수</p>
+      <p>• Cold Chain 위반 이력이 있는 배치는 즉시 품질 보류 상태 전환</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">↩️</span>반품·회수(Recall) — 제약 특유의 역물류</h3>
+    <p>의약품 반품과 회수는 일반 제조업과 차원이 다른 규제 절차를 수반합니다.</p>
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table>
+        <tr><th>유형</th><th>발생 원인</th><th>ERP 처리</th><th>원가 영향</th></tr>
+        <tr><td><strong>유효기간 만료 반품</strong></td><td>약국·병원의 기간 만료 재고</td><td>Return Delivery → 폐기</td><td>당기 손실 처리</td></tr>
+        <tr><td><strong>자발적 회수 (Class I–III)</strong></td><td>품질 결함 또는 안전성 이슈</td><td>Quality Notification → 리콜 오더</td><td>회수 비용 + 재고 손실</td></tr>
+        <tr><td><strong>행정 반품</strong></td><td>약가 인하, 품목 삭제</td><td>Credit Memo + 재고 반입</td><td>수익 조정</td></tr>
+      </table>
+    </div>
+    <div class="callout warn" style="margin-top:16px; margin-bottom:0">
+      <div class="callout-title">⚠️ 구축 이슈</div>
+      회수(Recall) 시나리오에서 <strong>Batch Traceability</strong>가 결정적입니다. 특정 Batch가 어떤 고객사에 얼마나 납품되었는지 즉시 조회 가능해야 합니다. SAP Batch Where-Used 기능의 설계 우선순위가 높습니다.
+    </div>
+  </div>
+
+  <div class="drill">
+    <div class="drill-header" onclick="toggleDrill(this)">
+      <span>💡 불합격 배치 원가는 어떻게 처리하는가?</span>
+      <span class="drill-arrow">▼</span>
+    </div>
+    <div class="drill-body">
+      <p>배치 전량 불합격 판정 시 3가지 선택지가 있습니다:</p>
+      <p style="margin-top:8px"><strong>1. 폐기 (Scrapping):</strong> SAP에서 Goods Issue to Scrap. 해당 배치의 누적 원가 전액이 당기 손실(비용)로 인식됩니다.</p>
+      <p style="margin-top:8px"><strong>2. 재작업 (Rework):</strong> 별도의 Rework Process Order를 생성. 재작업 비용이 추가로 집계되어 완제품 원가에 반영됩니다. GMP 관점에서 재작업 절차와 일탈 보고(Deviation Report)가 필수입니다.</p>
+      <p style="margin-top:8px"><strong>3. 폐기+보험 청구:</strong> 원료 공급사 또는 계약 위반에 따른 품질 이슈라면 공급사 청구. SAP SD의 Debit Memo를 활용합니다.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════ SECTION 5 ═══════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-label">Section 05</div>
+  <h2>제약 ERP 시스템 생태계 — ERP는 일부일 뿐이다</h2>
+  <p class="section-subtitle">ISA-95 계층 구조와 ERP·MES·LIMS·QMS의 역할 분담을 그릴 수 있다</p>
+
+  <div class="callout navy">
+    <div class="callout-title">📌 핵심 전제</div>
+    일반 제조업에서는 ERP가 생산 관리의 중심입니다. 제약·바이오에서는 ERP가 여러 전문 시스템 중 하나일 뿐입니다. <strong>ERP 혼자 GMP 프로세스를 완결할 수 없습니다.</strong>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🏛️</span>ISA-95 자동화 피라미드 — 제약 IT 계층 구조</h3>
+    <p>국제 표준 ISA-95는 제조 IT 시스템을 5개 계층으로 정의합니다. 제약 ERP는 Level 4(사업관리)에 위치하며, Level 2–3(현장)은 MES/SCADA가 담당합니다.</p>
+  </div>
+
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-label">Level 4<br>사업관리</div>
+      <div class="arch-cells">
+        <div class="arch-cell highlight-cell">
+          <strong>ERP (SAP S/4HANA)</strong>
+          <span>재무·구매·판매·원가·계획</span>
+        </div>
+        <div class="arch-cell">
+          <strong>QMS</strong>
+          <span>CAPA·Deviation·Change Control</span>
+        </div>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Level 3<br>생산운영</div>
+      <div class="arch-cells">
+        <div class="arch-cell highlight-cell">
+          <strong>MES</strong>
+          <span>전자 Batch Record·작업지시 실행</span>
+        </div>
+        <div class="arch-cell highlight-cell">
+          <strong>LIMS</strong>
+          <span>QC 시험·역가 결과·CoA 발행</span>
+        </div>
+        <div class="arch-cell">
+          <strong>WMS</strong>
+          <span>창고·Batch 위치 추적</span>
+        </div>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Level 2<br>현장제어</div>
+      <div class="arch-cells">
+        <div class="arch-cell">
+          <strong>SCADA / DCS</strong>
+          <span>공정 파라미터 자동 수집</span>
+        </div>
+        <div class="arch-cell">
+          <strong>Building Mgmt</strong>
+          <span>Clean Room 온도·습도·압력</span>
+        </div>
+      </div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-label">Level 1<br>현장기기</div>
+      <div class="arch-cells">
+        <div class="arch-cell">
+          <strong>PLC / Sensors</strong>
+          <span>혼합기·코팅기·충전기 제어</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🔗</span>핵심 인터페이스 포인트 — 어디서 연결되는가</h3>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>인터페이스</th><th>데이터 방향</th><th>핵심 데이터</th><th>구축 난이도</th></tr>
+        <tr><td><strong>ERP → MES</strong></td><td>생산 오더 전달</td><td>Process Order, Recipe, BOM, Batch Size</td><td>⭐⭐⭐</td></tr>
+        <tr><td><strong>MES → ERP</strong></td><td>실적 확정</td><td>실제 투입량, 생산 수량, 공정 조건, eBR</td><td>⭐⭐⭐</td></tr>
+        <tr><td><strong>LIMS → ERP</strong></td><td>품질 판정 결과</td><td>역가값, 합격/보류/불합격, CoA 번호</td><td>⭐⭐⭐⭐</td></tr>
+        <tr><td><strong>ERP → LIMS</strong></td><td>시험 요청</td><td>검사 로트, 샘플링 계획, 시험 항목</td><td>⭐⭐</td></tr>
+        <tr><td><strong>QMS → ERP</strong></td><td>Change Control 결과</td><td>BOM 변경 승인, Recipe 버전 변경</td><td>⭐⭐</td></tr>
+        <tr><td><strong>ERP → WMS</strong></td><td>입출고 지시</td><td>Batch 이동, Shelf Life, 보관 조건</td><td>⭐⭐</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-title">⚠️ 구축 현장에서 가장 많이 발생하는 이슈</div>
+    <strong>LIMS↔ERP 역가 인터페이스</strong>는 제약 ERP 구축의 최고 난이도 과제입니다. 역가 값이 LIMS에서 확정되기 전에 생산을 시작해야 하는 경우, ERP는 표준 역가(Standard Potency)를 사용하고 확정 후 차이를 정산하는 설계가 필요합니다.
+  </div>
+
+  <div class="drill">
+    <div class="drill-header" onclick="toggleDrill(this)">
+      <span>💡 MES가 없는 제약사에서 SAP PP-PI만으로 GMP를 충족할 수 있는가?</span>
+      <span class="drill-arrow">▼</span>
+    </div>
+    <div class="drill-body">
+      <p>이론적으로는 가능합니다. SAP PP-PI의 <strong>PI Sheet(공정지시서)</strong>를 활용하면 ERP 내에서 전자 Batch Record를 부분적으로 구현할 수 있습니다.</p>
+      <p style="margin-top:10px">그러나 실무적 한계가 있습니다: 실시간 공정 파라미터 자동 수집, 설비별 전자 연동, 복잡한 eBR(전자 배치 기록) 워크플로우는 SAP 표준만으로 구현하기 어렵습니다. 특히 <strong>FDA가 요구하는 수준의 공정 데이터 무결성</strong>을 PP-PI PI Sheet로 완전히 충족하기 어렵다는 것이 현장 전문가들의 공통적인 의견입니다.</p>
+      <p style="margin-top:10px">규모와 규제 요건에 따라: 소규모/국내 전용이라면 PP-PI + SAP QM으로 충분할 수 있고, 글로벌 수출 또는 FDA 실사 대상이라면 전용 MES 도입이 필수에 가깝습니다.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════ SECTION 6 ═══════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-label">Section 06</div>
+  <h2>SAP 구축 핵심 고려사항</h2>
+  <p class="section-subtitle">PP-PI vs PP 선택 기준, Recipe Management, Batch Classification, Serialization 등 제약 특화 설계 결정사항을 정리한다</p>
+
+  <div class="card">
+    <h3><span class="icon">🔀</span>PP-PI vs PP — 제약 ERP 첫 번째 설계 결정</h3>
+    <p>제약 고객사를 처음 만나면 반드시 확인해야 하는 질문: <strong>"현재 PP를 쓰고 있나요, PP-PI를 쓰고 있나요?"</strong></p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>SAP PP (Production Planning)</h3>
+      <p>이산 제조(Discrete Manufacturing) 중심. BOM + Routing(작업순서)으로 구성. 제약에서는 제형 단순, 소규모, 국내용에서 사용하는 경우 있으나 GMP 문서화 한계.</p>
+      <div class="callout wrong" style="margin-top:14px; margin-bottom:0">
+        <div class="callout-title">❌ 제약에서 PP만 사용하면 안 되는 이유</div>
+        Batch Record (PI Sheet), Master Recipe, 역가 기반 투입량 자동계산 미지원
+      </div>
+    </div>
+    <div class="card">
+      <h3>SAP PP-PI (Production Planning for Process Industries)</h3>
+      <p>화학·제약·식음료 공정 제조 전용. <strong>Master Recipe + PI Sheet(Process Instruction Sheet)</strong>가 핵심. GMP Batch Record를 전자화하는 데 최적화.</p>
+      <div class="callout correct" style="margin-top:14px; margin-bottom:0">
+        <div class="callout-title">✅ 제약 ERP 표준 선택</div>
+        역가 BOM, 전자 Batch Record, 공정 파라미터 수집, MES 연동이 모두 PP-PI 기반
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📖</span>Master Recipe — 허가 제조법의 ERP 구현</h3>
+    <p>PP-PI의 핵심 마스터 데이터. 규제 허가 제조법이 ERP Master Recipe로 전환됩니다. BOM(재료 목록)과 Routing(공정 순서)을 통합한 구조입니다.</p>
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table>
+        <tr><th>구성 요소</th><th>내용</th><th>GMP 의미</th></tr>
+        <tr><td><strong>Material List</strong></td><td>역가 기반 원료·부형제 목록</td><td>허가된 원료 규격 = 법적 근거</td></tr>
+        <tr><td><strong>Operations</strong></td><td>혼합→과립→건조→타정→코팅 단계</td><td>허가된 공정 순서 = 변경 불가</td></tr>
+        <tr><td><strong>Phases</strong></td><td>각 공정 단계의 세부 작업</td><td>PI Sheet로 작업자에게 지시</td></tr>
+        <tr><td><strong>Process Parameters</strong></td><td>온도, 시간, 속도 등 공정 조건</td><td>실측값과 비교 → 일탈 감지</td></tr>
+        <tr><td><strong>Version 관리</strong></td><td>레시피 변경 이력 보존</td><td>허가 변경 없이 버전 변경 = 규제 위반</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🏷️</span>Batch Classification — 제약 재고 관리의 핵심</h3>
+    <p>SAP Batch Management + Classification System으로 배치의 모든 특성을 구조화합니다. 제약에서는 다음 특성이 필수입니다:</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="icon">📅</span>날짜 특성</h3>
+      <p>• 제조일자 (Manufacturing Date)<br>• 유효기간 (Expiry Date / SLED)<br>• 검사일 (Test Date)<br>• 재시험일 (Retest Date)</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🧪</span>품질 특성</h3>
+      <p>• 역가 측정값 (Potency %)<br>• 합격/보류/불합격 상태<br>• 시험 항목별 결과값<br>• CoA 번호</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🌍</span>허가 특성</h3>
+      <p>• 판매 허가 국가 목록<br>• 규제기관 코드<br>• 출하 승인 여부 (Released)<br>• Quarantine 사유</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📍</span>Serialization & Track and Trace — ATTP</h3>
+    <p>한국(의약품 일련번호제), 미국(DSCSA), EU(FMD) 등 주요 시장은 의약품 개별 포장 단위까지 일련번호 관리를 법적으로 의무화합니다.</p>
+    <div class="callout navy" style="margin-top:16px; margin-bottom:0">
+      <div class="callout-title">📌 SAP ATTP (Advanced Track and Trace for Pharmaceuticals)</div>
+      SAP S/4HANA와 통합되는 Serialization 전용 솔루션. 제조→출하→유통→소비자까지 개별 단위 추적. 기본 SAP SD/MM으로 구현하면 성능 문제 발생 → ATTP별도 설계 검토 필수.
+    </div>
+  </div>
+
+  <div class="drill">
+    <div class="drill-header" onclick="toggleDrill(this)">
+      <span>💡 SAP QM 모듈 — 제약에서 필수 활성화 항목</span>
+      <span class="drill-arrow">▼</span>
+    </div>
+    <div class="drill-body">
+      <p><strong>검사 로트 (Inspection Lot):</strong> 모든 입고·생산·출하 시 자동 생성. 시험 완료 전까지 재고 이동 차단.</p>
+      <p style="margin-top:10px"><strong>동적 변경 규칙 (Dynamic Modification):</strong> 공급사 품질 이력에 따라 검사 수준 자동 조정 (스킵 검사 포함).</p>
+      <p style="margin-top:10px"><strong>Stability Testing:</strong> 보관 조건별 안정성 시험 일정 관리. 유효기간 설정의 과학적 근거.</p>
+      <p style="margin-top:10px"><strong>CAPA 워크플로우:</strong> 일탈 발생 → 근본원인 분석 → 시정조치 → 효과 검증까지의 전 과정을 SAP QM 또는 연동 QMS에서 관리.</p>
+      <p style="margin-top:10px"><strong>디지털 서명 (Digital Signature):</strong> 검사 결과 승인, 배치 출하 승인 시 적용. 21 CFR Part 11 요건 충족.</p>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-q">Q. 제약 ERP에서 SAP PP-PI를 PP 대신 사용하는 가장 핵심적인 이유는?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">① PP-PI가 PP보다 구축 비용이 저렴하기 때문에</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, true)">② Master Recipe와 PI Sheet를 통해 GMP Batch Record 전자화와 역가 기반 투입량 관리가 가능하기 때문에</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">③ PP-PI는 SAP S/4HANA에서만 사용 가능하기 때문에</div>
+      <div class="quiz-opt" onclick="checkQuiz(this, false)">④ PP-PI가 MES와 인터페이스할 때 별도 개발이 불필요하기 때문에</div>
+    </div>
+    <div class="quiz-feedback">
+      <strong>정답: ②</strong> — PP-PI의 핵심은 공정 제조(Process Manufacturing) 특화 구조입니다. GMP가 요구하는 전자 Batch Record(PI Sheet)와 레시피 기반 역가 계산이 PP에서는 표준으로 지원되지 않습니다.
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════ SECTION 7 ═══════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-label">Section 07</div>
+  <h2>사업계획(SAC-P) 적용 — 제약 특유의 계획 복잡성</h2>
+  <p class="section-subtitle">임상 파이프라인 불확실성부터 역가 변동·Clean Room 제약까지, 제약 사업계획의 고유한 설계 요건을 정리한다</p>
+
+  <div class="card">
+    <h3><span class="icon">🎯</span>제약 사업계획이 다른 LOB보다 어려운 이유</h3>
+    <p>제약 사업계획은 단순한 수요예측이 아닙니다. <strong>규제 허가 일정, 임상 성공률, 역가 변동, 설비 가용성</strong>이 모두 계획 변수로 작동합니다.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="icon">🔬</span>임상 파이프라인의 불확실성</h3>
+      <p>신약 파이프라인의 각 단계 성공률: Phase 1 (64%) → Phase 2 (35%) → Phase 3 (58%) → 허가 (85%). 이 확률적 변수를 사업계획에 어떻게 반영하는가?</p>
+      <p style="margin-top:10px"><strong>SAC-P 설계 포인트:</strong> 허가 시나리오별(낙관/기본/비관) 수요 계획 버전 관리. 허가 지연 시나리오의 P&L 영향 시뮬레이션.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">📜</span>허가 일정과 생산계획의 연동</h3>
+      <p>허가 없이는 생산 없습니다. 그런데 허가가 나면 즉시 시장 공급이 필요합니다. Pre-Launch Inventory 전략이 필요하지만 허가 전 상업 생산은 규제상 불가.</p>
+      <p style="margin-top:10px"><strong>SAC-P 설계 포인트:</strong> 허가 예상일을 Demand Driver로 설정. 허가 후 Ramp-Up 계획 자동 생성. Launch Stock 시나리오 시뮬레이션.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">⚗️</span>역가 변동을 생산계획에 반영하는 법</h3>
+    <p>역가는 배치마다 다릅니다. 사업계획 단계에서는 역가를 정확히 알 수 없으므로, <strong>표준 역가(Standard Potency)</strong>를 기준으로 계획하고 실행 시점에 실제 역가를 적용합니다.</p>
+    <div class="formula-box" style="margin-top:16px">
+      <div class="formula-title">생산계획 투입량 계산 (계획 단계)</div>
+      <span class="eq">계획 원료 소요량 = 목표 생산량 × 표준 역가 기준 계수 × (1 / 표준 수율)</span><br>
+      <span style="color:var(--muted); font-family:'Noto Sans KR',sans-serif; font-size:13px">※ 실행 시점에 LIMS 실제 역가 반영 → 실제 투입량 = 계획 대비 ±편차 발생</span>
+    </div>
+    <div class="callout navy" style="margin-bottom:0">
+      <div class="callout-title">📌 SAC-P 설계 시사점</div>
+      역가 편차가 큰 바이오의약품의 경우, 표준 역가 대비 ±10~15% 범위의 원료 버퍼를 계획에 반영해야 합니다. SAC-P에서 역가 민감도 분석 시나리오로 구현 가능합니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">🏭</span>Clean Room 제약과 Capacity Planning</h3>
+    <p>제약 설비는 일반 공장과 다릅니다. <strong>Clean Room 등급, 장비 검증(IQ/OQ/PQ) 상태, 세척·소독 시간</strong>이 실질적 가용 시간을 크게 줄입니다.</p>
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table>
+        <tr><th>Capacity 제약 요소</th><th>내용</th><th>SAC-P 반영 방법</th></tr>
+        <tr><td><strong>Clean Room 등급</strong></td><td>Class A~D 등급별 제한 제품군</td><td>Resource Group으로 등급별 Capacity 분리</td></tr>
+        <tr><td><strong>세척(Cleaning) 시간</strong></td><td>제품 교체 시 장비 세척 검증 필요 (CIP)</td><td>Campaign Sequence = 세척 최소화 배열</td></tr>
+        <tr><td><strong>장비 검증 다운타임</strong></td><td>정기 PQ(성능 검증) 기간 생산 불가</td><td>Planned Maintenance Block으로 Capacity 차감</td></tr>
+        <tr><td><strong>Cold Chain 설비</strong></td><td>냉동 보관 용량 한계</td><td>Storage Capacity Plan 별도 관리</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📊</span>제약 P&L 시뮬레이션 특유의 고려사항</h3>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="icon">💊</span>약가 및 리베이트 관리</h3>
+      <p>국내 건강보험 약가는 정부가 고시합니다. 또한 병원·도매상에 대한 리베이트(할인)가 실질 수익에 영향. SAC-P 매출 계획 시 <strong>공급가 vs 약가 vs 실수익</strong> 3단계 구조 설계 필요.</p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🔄</span>제네릭 출시 시나리오</h3>
+      <p>오리지널 약의 특허 만료 시 제네릭 경쟁사 진입으로 급격한 수요 하락. 특허 만료일을 기준으로 <strong>시장 점유율 시나리오 계획</strong>이 필수. SAC-P 시나리오 비교 기능 활용.</p>
+    </div>
+  </div>
+
+  <hr style="border:none; border-top:1px solid var(--border); margin: 32px 0 28px;">
+
+  <div style="font-family:'DM Serif Display',serif; font-size:22px; color:var(--navy); margin-bottom:20px;">✔ 핵심 점검 체크리스트</div>
+
+  <div class="checklist" id="cl1">
+    <div class="checklist-title">📋 제약·바이오 ERP 구축 전 확인사항</div>
+    <div class="check-progress-bar"><div class="check-progress-fill" id="cl1-bar" style="width:0%"></div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">기업 유형(완제/원료/바이오/CMO) 확인 → ERP 범위 결정</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">GMP 인증 현황 및 규제기관 확인 (식약처/FDA/EMA)</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">PP-PI vs PP 선택 및 Master Recipe 전환 범위 협의</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">역가(Potency) BOM 설계 — LIMS 연동 방식 확정</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">MES 도입 여부 결정 → ERP-MES 인터페이스 설계</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">Batch Classification 특성 설계 (역가, 유효기간, 허가국가 등)</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">21 CFR Part 11 / KGMP 전자기록 요건 검토 및 CSV/CSA 전략 수립</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">Shelf Life 계획 이슈 확인 — 표준 MRP Gap 여부 및 대안 설계</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">Serialization(일련번호) 법적 의무 확인 (ATTP 도입 필요성)</div></div>
+    <div class="check-item" onclick="toggleCheck(this,'cl1')"><div class="check-box"></div><div class="check-text">SAC-P 연동 시 역가 표준값, 허가 시나리오, Clean Room Capacity 반영 설계</div></div>
+  </div>
+
+  <div class="summary-strip">
+    <div class="ss-item">
+      <div class="ss-icon">🏛️</div>
+      <div class="ss-text">GMP 규제가<br>ERP 설계의 출발점</div>
+    </div>
+    <div class="ss-item">
+      <div class="ss-icon">🧬</div>
+      <div class="ss-text">역가 BOM은<br>LIMS 연동 없이 불완전</div>
+    </div>
+    <div class="ss-item">
+      <div class="ss-icon">🔗</div>
+      <div class="ss-text">ERP는 생태계의<br>일부, MES·LIMS 필수</div>
+    </div>
+    <div class="ss-item">
+      <div class="ss-icon">📊</div>
+      <div class="ss-text">사업계획은<br>허가·역가·Clean Room 연동</div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+</div>
+
+<script>
+// NAV SCROLL
+function scrollToSection(id, btn) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById(id);
+  if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 56; window.scrollTo({top: y, behavior:'smooth'}); }
+}
+
+// DRILL TOGGLE
+function toggleDrill(header) {
+  header.parentElement.classList.toggle('open');
+}
+
+// QUIZ
+function checkQuiz(opt, correct) {
+  const quiz = opt.closest('.quiz');
+  if (quiz.dataset.answered) return;
+  quiz.dataset.answered = '1';
+  quiz.querySelectorAll('.quiz-opt').forEach(o => o.style.pointerEvents = 'none');
+  const fb = quiz.querySelector('.quiz-feedback');
+  if (correct) {
+    opt.classList.add('correct');
+    fb.classList.add('show', 'ok');
+  } else {
+    opt.classList.add('wrong');
+    fb.classList.add('show', 'ng');
+    quiz.querySelectorAll('.quiz-opt').forEach(o => {
+      if (o.onclick.toString().includes('true')) o.classList.add('correct');
+    });
+  }
+}
+
+// CHECKLIST
+function toggleCheck(item, clId) {
+  item.classList.toggle('checked');
+  item.querySelector('.check-box').textContent = item.classList.contains('checked') ? '✓' : '';
+  const all = document.querySelectorAll('#' + clId + ' .check-item');
+  const done = document.querySelectorAll('#' + clId + ' .check-item.checked');
+  document.getElementById(clId + '-bar').style.width = (done.length / all.length * 100) + '%';
+}
+
+// ACTIVE NAV ON SCROLL
+window.addEventListener('scroll', () => {
+  const sections = ['s1','s2','s3','s4','s5','s6','s7'];
+  const tabs = document.querySelectorAll('.nav-tab');
+  let current = 0;
+  sections.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < 100) current = i;
+  });
+  tabs.forEach((t,i) => t.classList.toggle('active', i === current));
+});
+</script>
+</body>
+</html>
