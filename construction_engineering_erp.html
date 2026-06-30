@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건설·엔지니어링 ERP — 프로젝트가 회계의 중심이다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #003366;
+    --navy-light: #0a4a8a;
+    --navy-dim: #002244;
+    --bg: #f0f3f8;
+    --bg-card: #ffffff;
+    --text-primary: #1A1A2E;
+    --text-secondary: #4A4A6A;
+    --text-muted: #7A7A9A;
+    --border: #D8DEE9;
+    --border-strong: #B8C4D4;
+    --warn: #B8860B;
+    --warn-bg: #FFF8E7;
+    --correct: #1a7a4a;
+    --correct-bg: #EAF7F0;
+    --wrong: #B23A3A;
+    --wrong-bg: #FDEEEE;
+    --pad-x: 96px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.7;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .serif { font-family: 'DM Serif Display', 'Noto Sans KR', serif; }
+  code, .mono { font-family: 'JetBrains Mono', 'Noto Sans KR', monospace; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0 var(--pad-x);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .header-logo { display: flex; align-items: center; gap: 14px; }
+  .logo-mark { width: 32px; height: 32px; background: #fff; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .logo-text { font-size: 15px; font-weight: 600; color: #fff; }
+  .logo-sub { font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.65); margin-top: 1px; }
+  .header-badge {
+    font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 12px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 64px var(--pad-x) 48px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .hero::before {
+    content: ''; position: absolute; left: var(--pad-x); top: 64px; bottom: 48px;
+    width: 3px; background: var(--navy); border-radius: 2px;
+  }
+  .hero-inner { padding-left: 24px; max-width: 920px; }
+  .hero-eyebrow { font-size: 11px; font-weight: 600; color: var(--navy); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+  .hero-title { font-size: 38px; font-weight: 400; color: var(--text-primary); line-height: 1.3; margin-bottom: 14px; }
+  .hero-title .accent { color: var(--navy); }
+  .hero-sub { font-size: 15px; color: var(--text-secondary); font-weight: 400; max-width: 720px; }
+  .hero-tags { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+  .hero-tag {
+    font-size: 11.5px; color: var(--navy); background: rgba(0,51,102,0.06);
+    border: 1px solid rgba(0,51,102,0.15); padding: 4px 12px; border-radius: 20px; font-weight: 500;
+  }
+
+  /* ── STICKY NAV ── */
+  .nav-tabs {
+    position: sticky; top: 64px; z-index: 150;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--pad-x);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    flex-shrink: 0;
+    padding: 14px 18px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-bottom: 2.5px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav-tab:hover { color: var(--navy); }
+  .nav-tab.active { color: var(--navy); border-bottom-color: var(--navy); font-weight: 600; }
+
+  /* ── MAIN ── */
+  main { max-width: 1080px; margin: 0 auto; padding: 0 var(--pad-x) 80px; }
+
+  .chapter { padding-top: 56px; scroll-margin-top: 130px; }
+  .chapter:first-of-type { padding-top: 48px; }
+
+  .chapter-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .chapter-num { font-size: 13px; font-weight: 700; color: var(--navy); letter-spacing: 0.08em; }
+  .chapter-title { font-size: 26px; font-weight: 400; color: var(--text-primary); }
+  .chapter-lede { font-size: 15px; color: var(--text-secondary); margin: 8px 0 28px; max-width: 760px; }
+
+  h3.section-h { font-size: 17px; font-weight: 700; color: var(--navy); margin: 32px 0 14px; padding-bottom: 8px; border-bottom: 1.5px solid var(--border); }
+  h3.section-h:first-of-type { margin-top: 0; }
+
+  p { font-size: 14.5px; color: var(--text-secondary); margin-bottom: 14px; }
+  strong { color: var(--text-primary); font-weight: 600; }
+
+  ul.bullet, ol.bullet { margin: 10px 0 16px 0; padding-left: 0; list-style: none; }
+  ul.bullet li, ol.bullet li {
+    font-size: 14.5px; color: var(--text-secondary); padding: 7px 0 7px 20px;
+    position: relative; border-bottom: 1px solid rgba(216,222,233,0.5);
+  }
+  ul.bullet li:last-child, ol.bullet li:last-child { border-bottom: none; }
+  ul.bullet li::before { content: ''; position: absolute; left: 0; top: 16px; width: 6px; height: 6px; background: var(--navy); border-radius: 50%; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 22px 24px; margin: 18px 0;
+  }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  @media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ── CALLOUT ── */
+  .callout { border-radius: 6px; padding: 16px 20px; margin: 18px 0; font-size: 14px; border-left: 4px solid; }
+  .callout-navy { background: rgba(0,51,102,0.05); border-color: var(--navy); }
+  .callout-warn { background: var(--warn-bg); border-color: var(--warn); }
+  .callout-correct { background: var(--correct-bg); border-color: var(--correct); }
+  .callout-wrong { background: var(--wrong-bg); border-color: var(--wrong); }
+  .callout-label { font-weight: 700; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .callout-navy .callout-label { color: var(--navy); }
+  .callout-warn .callout-label { color: var(--warn); }
+  .callout-correct .callout-label { color: var(--correct); }
+  .callout-wrong .callout-label { color: var(--wrong); }
+  .callout p { margin-bottom: 0; color: var(--text-primary); }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 24px; margin: 20px 0;
+  }
+  .flow-step {
+    background: rgba(0,51,102,0.04); border: 1.5px solid var(--navy);
+    border-radius: 5px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+    color: var(--navy); text-align: center; min-width: 90px;
+  }
+  .flow-arrow { color: var(--border-strong); font-size: 18px; padding: 0 10px; flex-shrink: 0; }
+  .flow-vertical { flex-direction: column; align-items: stretch; }
+  .flow-vertical .flow-step { width: 100%; }
+  .flow-vertical .flow-arrow { text-align: center; padding: 4px 0; }
+
+  /* ── TABLE ── */
+  table.data-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13.5px; }
+  table.data-table th {
+    background: var(--navy); color: #fff; font-weight: 600; text-align: left;
+    padding: 10px 14px; font-size: 12.5px;
+  }
+  table.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  table.data-table tr:nth-child(even) td { background: rgba(0,51,102,0.02); }
+  table.data-table td strong { color: var(--text-primary); }
+
+  /* ── QUIZ ── */
+  .quiz { background: var(--bg-card); border: 1.5px solid var(--navy); border-radius: 6px; padding: 22px 24px; margin: 22px 0; }
+  .quiz-q { font-size: 14.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; }
+  .quiz-opt {
+    display: block; width: 100%; text-align: left; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 5px; padding: 11px 16px;
+    font-size: 13.5px; color: var(--text-secondary); margin-bottom: 8px; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif; transition: border-color 0.15s, background 0.15s;
+  }
+  .quiz-opt:hover { border-color: var(--navy); background: rgba(0,51,102,0.03); }
+  .quiz-opt.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); font-weight: 600; }
+  .quiz-opt.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); font-weight: 600; }
+  .quiz-feedback { font-size: 13.5px; margin-top: 10px; padding: 12px 16px; border-radius: 5px; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: var(--correct-bg); color: var(--correct); }
+  .quiz-feedback.wrong-fb { background: var(--wrong-bg); color: var(--wrong); }
+
+  /* ── DRILL TOGGLE ── */
+  .drill { border: 1px solid var(--border); border-radius: 6px; margin: 16px 0; overflow: hidden; }
+  .drill-head {
+    background: var(--bg-card); padding: 14px 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px; font-weight: 600; color: var(--text-primary);
+  }
+  .drill-head:hover { background: rgba(0,51,102,0.03); }
+  .drill-head .drill-icon { color: var(--navy); font-size: 13px; transition: transform 0.2s; }
+  .drill-head.open .drill-icon { transform: rotate(45deg); }
+  .drill-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; background: #fafbfc; }
+  .drill-body.open { max-height: 1200px; padding: 4px 20px 18px; }
+  .drill-body p, .drill-body ul { margin-top: 10px; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; margin: 16px 0; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px; padding: 9px 0;
+    border-bottom: 1px solid rgba(216,222,233,0.5); font-size: 14px; color: var(--text-secondary);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist input[type="checkbox"] { margin-top: 3px; accent-color: var(--navy); flex-shrink: 0; cursor: pointer; }
+  .checklist li.checked-label { color: var(--text-muted); text-decoration: line-through; }
+
+  /* ── KPI/STAT ── */
+  .stat-row { display: flex; gap: 14px; margin: 20px 0; flex-wrap: wrap; }
+  .stat-box { flex: 1; min-width: 150px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── SCENARIO BOX ── */
+  .scenario {
+    background: var(--navy-dim); color: #fff; border-radius: 6px; padding: 22px 26px; margin: 20px 0;
+  }
+  .scenario-tag { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); font-weight: 600; margin-bottom: 10px; }
+  .scenario p { color: rgba(255,255,255,0.9); margin-bottom: 8px; font-size: 14px; }
+  .scenario strong { color: #fff; }
+
+  /* ── CH NAV (prev/next) ── */
+  .ch-footer-nav { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .ch-nav-btn { font-size: 13px; color: var(--navy); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .ch-nav-btn:hover { text-decoration: underline; }
+
+  /* ── FOOTER ── */
+  footer { background: var(--navy-dim); padding: 24px var(--pad-x); display: flex; align-items: center; justify-content: space-between; }
+  .footer-copy { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 300; }
+  .footer-tag { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+
+  @media (max-width: 768px) {
+    :root { --pad-x: 20px; }
+    .hero-title { font-size: 26px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .chapter-title { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <div class="logo-mark">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="2" width="8" height="8" fill="#003366"/>
+        <rect x="12" y="2" width="8" height="8" fill="#003366"/>
+        <rect x="2" y="12" width="8" height="8" fill="#003366"/>
+        <rect x="12" y="12" width="8" height="8" fill="#003366" opacity="0.4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">ASPN</div>
+      <div class="logo-sub">BAC Business Division</div>
+    </div>
+  </div>
+  <div class="header-badge">LOB Deep Dive Series</div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">LOB 심화 학습 · Construction &amp; Engineering</div>
+    <h1 class="hero-title">건설·엔지니어링 ERP<br><span class="accent">프로젝트가 회계의 중심이다</span></h1>
+    <p class="hero-sub">제조업이 반복생산을 기준으로 회계를 설계한다면, 건설·EPC는 프로젝트 단위로 모든 것을 설계합니다. 원가, 예산, 일정, 구매, 수익인식 — 모두 프로젝트를 중심으로 움직입니다.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">SAP PS</span>
+      <span class="hero-tag">IFRS 15</span>
+      <span class="hero-tag">Contract Asset / Liability</span>
+      <span class="hero-tag">Project Accounting</span>
+      <span class="hero-tag">EPC</span>
+      <span class="hero-tag">Availability Control</span>
+    </div>
+  </div>
+</div>
+
+<nav class="nav-tabs" id="navTabs">
+  <a href="#ch1" class="nav-tab active">01 비즈니스</a>
+  <a href="#ch2" class="nav-tab">02 프로젝트 구조</a>
+  <a href="#ch3" class="nav-tab">03 원가관리</a>
+  <a href="#ch4" class="nav-tab">04 기성관리</a>
+  <a href="#ch5" class="nav-tab">05 계약관리</a>
+  <a href="#ch6" class="nav-tab">06 IFRS 15·계약자산</a>
+  <a href="#ch7" class="nav-tab">07 SAP 통합</a>
+  <a href="#ch8" class="nav-tab">08 Pitfalls</a>
+  <a href="#ch9" class="nav-tab">09 Fit-Gap</a>
+</nav>
+
+<main>
+
+  <!-- ═══════════ CHAPTER 1 ═══════════ -->
+  <section class="chapter" id="ch1">
+    <div class="chapter-head">
+      <span class="chapter-num">01</span>
+      <h2 class="chapter-title">왜 건설·엔지니어링 ERP는 다른가?</h2>
+    </div>
+    <p class="chapter-lede">제조업 ERP를 다뤄본 컨설턴트가 건설 프로젝트에 처음 투입되면 가장 먼저 부딪히는 질문은 "왜 모든 게 프로젝트 코드로 시작하는가"입니다. 이 질문에 답하는 것이 건설 ERP 이해의 출발점입니다.</p>
+
+    <h3 class="section-h">제조업 vs 건설·EPC — 구조적 차이</h3>
+    <table class="data-table">
+      <tr><th>구분</th><th>제조업 (반복생산)</th><th>건설·EPC (수주산업)</th></tr>
+      <tr><td><strong>생산 방식</strong></td><td>동일 제품 반복 생산</td><td>단속생산 — 매 프로젝트가 유일</td></tr>
+      <tr><td><strong>원가 집계 단위</strong></td><td>제품(Material) 단위</td><td>프로젝트(WBS) 단위</td></tr>
+      <tr><td><strong>수익인식 시점</strong></td><td>판매 시점(인도 기준)</td><td>진행기준(공사기간 전체에 걸쳐 분산)</td></tr>
+      <tr><td><strong>원가표준</strong></td><td>표준원가 사전 설정 가능</td><td>프로젝트별 견적원가, 사후 확정</td></tr>
+      <tr><td><strong>조직 단위</strong></td><td>공장(Plant) 고정</td><td>현장(Site)이 프로젝트마다 신설·종료</td></tr>
+      <tr><td><strong>계약 변경</strong></td><td>드묾</td><td>상시 발생 (Change Order)</td></tr>
+    </table>
+
+    <h3 class="section-h">프로젝트 = 회계의 중심</h3>
+    <p>건설·EPC ERP의 본질은 한 문장으로 요약됩니다: <strong>프로젝트가 동시에 Cost Object이자 Profit Center이자 회계단위</strong>입니다.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">📊 Cost Object</div>
+        <p style="margin-bottom:0;">모든 원가(자재, 인건비, 외주비)가 프로젝트 WBS에 직접 집계됩니다. 제조업처럼 제품에 배부하는 것이 아니라, 애초에 프로젝트 단위로 발생합니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Profit Center</div>
+        <p style="margin-bottom:0;">프로젝트별로 손익이 독립적으로 측정됩니다. 본사 손익이 아니라 "어느 현장이 이익을 내는가"가 경영의 핵심 질문입니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📒 회계단위</div>
+        <p style="margin-bottom:0;">수익인식, 충당금, 마감까지 프로젝트 단위로 처리됩니다. 재무제표의 매출·원가는 결국 프로젝트 단위 집계의 합산입니다.</p>
+      </div>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-tag">ASPN Engineering 시나리오</div>
+      <p><strong>ASPN Engineering</strong>은 ASPN Group의 건설·플랜트 계열사로, 동남아 지역 화공플랜트 EPC 프로젝트 <strong>"PJT-2024-017 (Vina Petrochemical Plant)"</strong>를 수행 중입니다. 계약금액은 1,200억 원, 공사기간은 24개월입니다.</p>
+      <p style="margin-bottom:0;">이 시나리오를 본 모듈 전체에서 일관되게 사용하여 WBS 설계부터 IFRS 15 수익인식, Fit-Gap 체크리스트까지 숫자가 추적 가능하도록 구성합니다.</p>
+    </div>
+
+    <div class="callout callout-navy">
+      <span class="callout-label">컨설턴트 관점</span>
+      <p>건설 ERP 구축에서 가장 먼저 던져야 할 질문은 "이 회사의 매출인식 단위가 무엇인가"입니다. 프로젝트인지, 계약(Contract)인지, 혹은 계약 내 일부 패키지(Lot)인지에 따라 WBS 설계 전체가 달라집니다.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 2 ═══════════ -->
+  <section class="chapter" id="ch2">
+    <div class="chapter-head">
+      <span class="chapter-num">02</span>
+      <h2 class="chapter-title">프로젝트 구조 설계 (WBS / Network)</h2>
+    </div>
+    <p class="chapter-lede">WBS는 건설 ERP의 척추입니다. WBS 설계가 잘못되면 원가관리, 기성관리, 수익인식 모두 흔들립니다.</p>
+
+    <h3 class="section-h">WBS(Work Breakdown Structure) — 공종별/공정별 분류</h3>
+    <p>WBS는 프로젝트를 계층적으로 분해한 구조입니다. 건설업에서는 보통 다음 두 가지 축으로 설계합니다.</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">공종 기준 (Discipline-based)</div>
+        <p style="margin-bottom:0;">토목, 건축, 기계, 전기, 배관 등 공사 분야별로 WBS를 분해. 원가 통제와 하도급 관리에 유리하지만 진행률 통합 시 복잡도 증가.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">공정 기준 (Phase-based)</div>
+        <p style="margin-bottom:0;">설계·구매·시공(EPC) 단계별로 WBS를 분해. 프로젝트 마일스톤 관리에 유리하지만 공종별 원가 비교가 어려움.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">설계 원칙</span>
+      <p>실무에서는 상위 레벨은 공정 기준, 하위 레벨은 공종 기준으로 혼합 설계하는 경우가 많습니다. 단, 레벨이 깊어질수록 입력 부담이 커지므로 "관리 가능한 깊이"가 핵심 판단 기준입니다 (Chapter 8 Pitfalls 참조).</p>
+    </div>
+
+    <h3 class="section-h">Network / Activity — 일정과 원가의 연결고리</h3>
+    <p>WBS가 원가의 구조라면, <strong>Network(공정표)</strong>는 일정의 구조입니다. SAP PS에서는 WBS Element 아래에 Network와 Activity를 연결하여 "언제, 무엇을, 얼마에" 수행할지를 동시에 관리합니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">WBS Element</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Network</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Activity</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Activity Element<br><span style="font-weight:400;font-size:11.5px;">(자재/인력/외주)</span></div>
+    </div>
+
+    <h3 class="section-h">프로젝트 라이프사이클</h3>
+    <div class="flow flow-vertical">
+      <div class="flow-step">수주 (Bid Win) — 견적원가 확정, 프로젝트 마스터 생성</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">착공 (Kick-off) — WBS/Network 확정, 예산 배정(Budget)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">시공 중 (Execution) — 원가 발생, 기성청구, 진행률 관리</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">준공 (Completion) — 최종 기성, 하자보증 시작</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">정산 (Closure) — 프로젝트 마감, 손익 확정</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">Q. ASPN Engineering의 PJT-2024-017 프로젝트에서, 화공설비(기계 공종)와 배관(배관 공종)의 원가를 따로 통제하면서도 EPC 단계별 마일스톤은 통합 관리하고 싶습니다. 가장 적절한 WBS 설계 방향은?</div>
+      <button class="quiz-opt" onclick="checkQuiz(this, false)">공종 기준 단일 레벨로만 설계한다</button>
+      <button class="quiz-opt" onclick="checkQuiz(this, true)">상위 레벨은 공정(E-P-C) 기준, 하위 레벨은 공종 기준으로 혼합 설계한다</button>
+      <button class="quiz-opt" onclick="checkQuiz(this, false)">공정과 공종을 완전히 분리된 두 개의 WBS로 각각 만든다</button>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 3 ═══════════ -->
+  <section class="chapter" id="ch3">
+    <div class="chapter-head">
+      <span class="chapter-num">03</span>
+      <h2 class="chapter-title">프로젝트 원가관리</h2>
+    </div>
+    <p class="chapter-lede">건설 원가관리의 핵심은 "실제 지출"이 아니라 "지출 약정(Commitment)" 시점부터 원가를 통제하는 것입니다.</p>
+
+    <h3 class="section-h">직접원가 vs 간접원가</h3>
+    <table class="data-table">
+      <tr><th>구분</th><th>내용</th><th>배부 방식</th></tr>
+      <tr><td><strong>직접원가</strong></td><td>자재비, 직접 인건비, 외주(하도급)비</td><td>WBS Element에 직접 집계</td></tr>
+      <tr><td><strong>간접원가 (현장관리비)</strong></td><td>현장사무소 운영비, 현장 공통 안전관리비, 현장 관리직 인건비</td><td>배부기준(원가/면적/인원 등)으로 WBS에 배부</td></tr>
+    </table>
+
+    <h3 class="section-h">Commitment — 발주 시점의 원가 인식</h3>
+    <p>제조업에서는 보통 실제 지출(Actual) 시점에 원가가 인식됩니다. 건설업에서는 그보다 앞선 <strong>구매발주(PO) 시점에 Commitment(약정원가)</strong>로 먼저 인식하는 것이 핵심입니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">예산(Budget)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">구매요청(PR)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">발주(PO)<br><span style="font-weight:400;font-size:11px;">Commitment 인식</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">입고/검수</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">실적원가(Actual)</div>
+    </div>
+
+    <div class="callout callout-correct">
+      <span class="callout-label">왜 중요한가</span>
+      <p>PO 시점에 Commitment를 인식하지 않으면, PM은 "아직 돈을 안 썼다"고 착각하지만 실제로는 이미 예산이 약정된 상태입니다. Commitment 관리 없이는 예산 초과를 사전에 통제할 수 없습니다.</p>
+    </div>
+
+    <h3 class="section-h">Budget Control / Availability Control (가용성 통제)</h3>
+    <p>SAP PS에서 가장 많이 구현되는 핵심 기능 중 하나가 <strong>Availability Control(AVC)</strong>입니다. 예산 대비 실제+약정 원가를 실시간으로 비교하여 초과 시 시스템적으로 통제합니다.</p>
+
+    <div class="flow flow-vertical">
+      <div class="flow-step">Budget 배정 (WBS 레벨별 예산 등록)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Commitment 발생 (PO 발행 시 예산 차감 검토)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Actual 발생 (입고/실적 반영)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Availability Control 판정<br><span style="font-weight:400;font-size:11.5px;">Warning(경고) 또는 Error(차단) 단계 설정</span></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">⚠️ Warning 단계 (예: 예산의 90%)</div>
+        <p style="margin-bottom:0;">시스템이 경고 메시지를 띄우지만 거래는 진행 가능. PM에게 알림 발송.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🛑 Error 단계 (예: 예산의 100%)</div>
+        <p style="margin-bottom:0;">거래 자체가 시스템적으로 차단됨. 예산 증액(Budget Revision) 승인 전까지 추가 발주 불가.</p>
+      </div>
+    </div>
+
+    <div class="drill">
+      <div class="drill-head" onclick="toggleDrill(this)">
+        <span>심화 — 중장비(Equipment) 관리와 원가 연계</span>
+        <span class="drill-icon">+</span>
+      </div>
+      <div class="drill-body">
+        <p>EPC 프로젝트는 자체 보유 또는 임차한 중장비(타워크레인, 굴삭기 등)를 다수 현장에서 공유합니다. SAP에서는 Equipment Master를 PS의 Activity와 연계하여 장비 가동시간을 원가로 배부합니다.</p>
+        <ul class="bullet">
+          <li>자가 보유 장비: 감가상각(AA)을 내부 사용료(Internal Activity Rate)로 환산해 WBS에 배부</li>
+          <li>임차 장비: 임차료를 직접원가로 해당 WBS에 집계</li>
+          <li>다현장 공유 장비: 가동일보(Equipment Usage) 기준으로 현장간 배부</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="section-h">하도급 원가 관리</h3>
+    <p>건설 프로젝트 원가의 상당 부분은 하도급(Subcontract)입니다. 관리 흐름은 다음과 같습니다.</p>
+    <ol class="bullet">
+      <li><strong>1. 하도급 발주</strong> — 계약금액 기준 PO 발행, WBS에 Commitment 인식</li>
+      <li><strong>2. 기성 확인</strong> — 하도급사 기성 신청 → 현장 검측 → 승인</li>
+      <li><strong>3. 기성 지급</strong> — 승인된 기성금액에서 유보금(Retention) 공제 후 지급</li>
+      <li><strong>4. 정산</strong> — 준공 후 최종 정산, 유보금 환급 처리</li>
+    </ol>
+  </section>
+
+  <!-- ═══════════ CHAPTER 4 ═══════════ -->
+  <section class="chapter" id="ch4">
+    <div class="chapter-head">
+      <span class="chapter-num">04</span>
+      <h2 class="chapter-title">기성관리와 진행률 관리</h2>
+    </div>
+    <p class="chapter-lede">"기성을 청구했다"는 것과 "수익을 인식했다"는 것은 다른 개념입니다. 이 둘의 괴리를 이해하는 것이 건설 회계의 핵심입니다.</p>
+
+    <h3 class="section-h">Progress Billing(기성청구) vs 실제 원가 진행률</h3>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">기성청구 (Progress Billing)</div>
+        <p style="margin-bottom:0;">계약서에 명시된 기성 조건(월별/마일스톤별)에 따라 발주처에 청구하는 금액. 계약상 합의된 산정 방식을 따르며, 실제 원가 발생과 시점이 일치하지 않을 수 있습니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">실제 원가 진행률</div>
+        <p style="margin-bottom:0;">실제 투입원가를 총 예정원가로 나눈 비율. 수익인식(IFRS 15)의 기초가 되는 진행률이며, 기성청구율과 별개로 산정됩니다.</p>
+      </div>
+    </div>
+
+    <h3 class="section-h">진행률 산정 방식</h3>
+    <table class="data-table">
+      <tr><th>방식</th><th>산정 기준</th><th>특징</th></tr>
+      <tr><td><strong>원가기준 (Cost-to-Cost)</strong></td><td>발생원가 ÷ 총예정원가</td><td>가장 보편적. 원가 데이터 신뢰도에 의존</td></tr>
+      <tr><td><strong>산출기준 (Output Method)</strong></td><td>완성 산출물(물량, 마일스톤) 기준</td><td>토목·인프라처럼 물량 측정이 명확한 경우 적합</td></tr>
+    </table>
+
+    <div class="card">
+      <div class="card-title">📐 ASPN Engineering 시나리오 — 진행률 계산 예시</div>
+      <p>PJT-2024-017 (계약금액 1,200억 원), 총예정원가 1,000억 원 가정 시점:</p>
+      <table class="data-table" style="margin-top:8px;">
+        <tr><th>항목</th><th>금액</th></tr>
+        <tr><td>누적 발생원가</td><td>400억 원</td></tr>
+        <tr><td>총예정원가</td><td>1,000억 원</td></tr>
+        <tr><td><strong>원가기준 진행률</strong></td><td><strong>40%</strong></td></tr>
+        <tr><td>누적 기성청구액 (계약조건 기준)</td><td>350억 원</td></tr>
+      </table>
+      <p style="margin-bottom:0; margin-top:10px;">진행률(40%) 기준 인식수익 = 1,200억 × 40% = <strong>480억 원</strong>. 기성청구액(350억)과의 차이(130억 원)가 미청구공사로 인식됩니다.</p>
+    </div>
+
+    <h3 class="section-h">미청구공사 · 초과청구공사 — 재무제표 임팩트</h3>
+    <p>진행률 기준 인식수익과 실제 기성청구액의 차이는 재무상태표에 자산 또는 부채로 남습니다.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title" style="color:var(--correct);">미청구공사 (Contract Asset)</div>
+        <p style="margin-bottom:0;"><strong>인식수익 &gt; 기성청구액</strong>인 경우 발생. "일은 했지만 아직 청구하지 못한 금액"으로, IFRS 15상 정식 계정명은 <strong>계약자산(Contract Asset)</strong>이며 재무상태표상 자산으로 계상됩니다. 위 예시의 130억 원이 이에 해당합니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">초과청구공사 (Contract Liability)</div>
+        <p style="margin-bottom:0;"><strong>기성청구액 &gt; 인식수익</strong>인 경우 발생. "청구는 했지만 아직 그만큼 일하지 않은 금액"으로, IFRS 15상 정식 계정명은 <strong>계약부채(Contract Liability)</strong>이며 부채로 계상됩니다.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">컨설턴트 관점</span>
+      <p>건설사 재무제표에서 미청구공사가 비정상적으로 누적되는 경우는 진행률 산정 오류이거나, 발주처와의 기성 협상이 지연되고 있다는 신호일 수 있습니다. 실사(Due Diligence) 단계에서 자주 점검하는 항목입니다.</p>
+    </div>
+
+    <div class="drill">
+      <div class="drill-head" onclick="toggleDrill(this)">
+        <span>심화 — Retention Money(유보금) 처리</span>
+        <span class="drill-icon">+</span>
+      </div>
+      <div class="drill-body">
+        <p>발주처는 통상 기성금액의 일정률(예: 5~10%)을 하자보수 담보 목적으로 유보합니다. 이는 하도급사에 대해서도 동일하게 적용됩니다.</p>
+        <ul class="bullet">
+          <li>원청 입장: 발주처로부터 받을 유보금은 장기매출채권으로 분류 (준공 후 일정기간 뒤 회수)</li>
+          <li>원청 입장: 하도급사에 지급할 유보금은 장기미지급금으로 분류</li>
+          <li>SAP 구현 시 별도 GL 계정 및 Aging 관리 필요 — 일반 매출채권과 회수 시점이 다름</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 5 ═══════════ -->
+  <section class="chapter" id="ch5">
+    <div class="chapter-head">
+      <span class="chapter-num">05</span>
+      <h2 class="chapter-title">프로젝트 계약관리와 변경관리</h2>
+    </div>
+    <p class="chapter-lede">건설 ERP는 "계약이 계속 변경되는 ERP"입니다. 원도급 계약 하나만 관리하는 것이 아니라, 계약의 변경 이력 전체를 추적해야 합니다.</p>
+
+    <h3 class="section-h">EPC 계약 유형</h3>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Lump Sum (정액 계약)</div>
+        <p style="margin-bottom:0;">총 계약금액이 고정. 물량 증감에 따른 리스크를 시공사가 부담. 원가 절감이 곧 이익 증가로 직결되어 원가관리 정밀도가 핵심.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Unit Price (단가 계약)</div>
+        <p style="margin-bottom:0;">물량 × 단가로 정산. 실제 시공물량에 따라 계약금액이 변동. 물량 측정(Survey)의 정확성이 핵심.</p>
+      </div>
+    </div>
+
+    <h3 class="section-h">계약 변경 흐름 — Change Order, Variation, Claim</h3>
+    <div class="flow flow-vertical">
+      <div class="flow-step">원도급 계약 체결 (Original Contract)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">설계변경 / 현장조건 변경 발생</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Variation Order 제기 (시공사 → 발주처)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">협상 / 승인 (Change Order 확정)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">Budget Revision (계약금액·예산 동시 갱신)</div>
+    </div>
+
+    <table class="data-table">
+      <tr><th>용어</th><th>의미</th></tr>
+      <tr><td><strong>Variation Order (VO)</strong></td><td>설계변경, 추가공사 등으로 인한 계약 범위·금액 변경 요청</td></tr>
+      <tr><td><strong>Change Order (CO)</strong></td><td>VO가 발주처 승인을 거쳐 공식 확정된 상태</td></tr>
+      <tr><td><strong>Claim</strong></td><td>공기 지연, 추가비용 등에 대해 시공사가 발주처에 제기하는 보상 청구 (승인 전까지는 수익으로 인식 불가, IFRS 15상 매우 보수적 기준 적용)</td></tr>
+      <tr><td><strong>LD (Liquidated Damages)</strong></td><td>지체상금 — 공기 지연 시 시공사가 발주처에 지급하는 위약금. 계약금액에서 차감되는 구조로 시스템 반영 필요</td></tr>
+    </table>
+
+    <div class="callout callout-wrong">
+      <span class="callout-label">실무 함정</span>
+      <p>Claim은 발주처 승인 전까지 회계적으로 "확정된 수익"이 아닙니다. 현장에서는 종종 Claim 금액을 기성에 선반영하려는 압력이 있는데, IFRS 15 기준 Claim 수익인식은 "받을 가능성이 높다(highly probable)"는 엄격한 조건을 충족해야 합니다.</p>
+    </div>
+
+    <h3 class="section-h">Budget Revision과의 연계</h3>
+    <p>Change Order가 확정되면 Chapter 3에서 다룬 Budget Control 체계와 반드시 연동되어야 합니다. 계약금액만 변경되고 시스템상 Budget이 갱신되지 않으면, Availability Control이 실제 상황과 어긋나 오작동합니다.</p>
+
+    <div class="drill">
+      <div class="drill-head" onclick="toggleDrill(this)">
+        <span>심화 — Advance Payment(선수금) 관리</span>
+        <span class="drill-icon">+</span>
+      </div>
+      <div class="drill-body">
+        <p>EPC 계약은 통상 착공 시점에 계약금액의 일부(10~20%)를 선수금으로 수령합니다.</p>
+        <ul class="bullet">
+          <li>선수금은 즉시 수익이 아니라 부채(계약부채)로 계상</li>
+          <li>이후 기성청구 시마다 선수금을 일정 비율로 상계(Recoupment)하며 차감</li>
+          <li>SAP에서는 별도 선수금 정산 로직(기성청구서상 선수금 차감 항목) 설계 필요</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">Q. 발주처가 아직 Variation Order를 공식 승인하지 않은 상태에서, 현장 PM이 "거의 확실히 승인될 것"이라며 해당 금액을 이번 달 수익에 반영해달라고 요청합니다. 올바른 대응은?</div>
+      <button class="quiz-opt" onclick="checkQuiz(this, false)">PM 판단을 신뢰하고 반영한다</button>
+      <button class="quiz-opt" onclick="checkQuiz(this, true)">IFRS 15 기준 "받을 가능성이 매우 높음(highly probable)"이 입증되기 전까지는 수익으로 인식하지 않는다</button>
+      <button class="quiz-opt" onclick="checkQuiz(this, false)">절반만 반영한다</button>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 6 ═══════════ -->
+  <section class="chapter" id="ch6">
+    <div class="chapter-head">
+      <span class="chapter-num">06</span>
+      <h2 class="chapter-title">IFRS 15 수익인식과 Contract Asset / Liability</h2>
+    </div>
+    <p class="chapter-lede">건설·엔지니어링 ERP의 핵심은 IFRS 15 자체가 아니라, 진행률(POC)을 기점으로 발생하는 계약자산(Contract Asset)과 계약부채(Contract Liability)를 어떻게 관리하느냐입니다. Chapter 4의 미청구공사·초과청구공사가 바로 이 두 계정의 실체이며, 여기서는 이를 수익인식 회계처리 전체 흐름 속에서 통합적으로 다룹니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">진행률<br>(POC)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">인식수익<br>vs 기성청구액</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Contract Asset<br><span style="font-weight:400;font-size:11px;">(미청구공사)</span></div>
+      <div class="flow-arrow">또는</div>
+      <div class="flow-step">Contract Liability<br><span style="font-weight:400;font-size:11px;">(초과청구공사)</span></div>
+      <div class="flow-arrow">+</div>
+      <div class="flow-step">Expected Loss<br><span style="font-weight:400;font-size:11px;">(공사손실충당금)</span></div>
+    </div>
+
+    <h3 class="section-h">POC(Percentage of Completion) — 진행기준 수익인식</h3>
+    <div class="flow">
+      <div class="flow-step">계약금액<br>1,200억</div>
+      <div class="flow-arrow">×</div>
+      <div class="flow-step">진행률<br>(Cost-to-Cost)</div>
+      <div class="flow-arrow">=</div>
+      <div class="flow-step">누적 인식수익</div>
+      <div class="flow-arrow">−</div>
+      <div class="flow-step">전기 누적수익</div>
+      <div class="flow-arrow">=</div>
+      <div class="flow-step">당기 인식수익</div>
+    </div>
+
+    <p>IFRS 15는 건설계약을 "기간에 걸쳐 이행하는 수행의무(performance obligation satisfied over time)"로 보아, 진행기준 수익인식을 원칙으로 합니다. SAP에서는 이를 자동화하기 위해 POC 환경설정(Result Analysis 또는 Event-Based Revenue Recognition)을 사용합니다.</p>
+
+    <h3 class="section-h">공사손실충당금 (예상손실)</h3>
+    <p>진행률과 무관하게, <strong>프로젝트 전체에서 손실이 예상되는 경우 즉시 전액을 손실로 인식</strong>해야 합니다. 이는 IFRS 15의 보수주의 원칙이 강하게 적용되는 영역입니다.</p>
+
+    <div class="card">
+      <div class="card-title">📐 예상손실 인식 예시</div>
+      <p>PJT-2024-017의 총예정원가가 원자재 가격 상승으로 1,000억 → 1,250억으로 재추정되었다고 가정합니다 (계약금액 1,200억 고정 — Lump Sum).</p>
+      <table class="data-table" style="margin-top:8px;">
+        <tr><th>항목</th><th>금액</th></tr>
+        <tr><td>계약금액</td><td>1,200억 원</td></tr>
+        <tr><td>재추정 총예정원가</td><td>1,250억 원</td></tr>
+        <tr><td><strong>예상 총손실</strong></td><td><strong>△50억 원</strong></td></tr>
+      </table>
+      <p style="margin-bottom:0; margin-top:10px;">진행률이 40%에 불과하더라도, 예상되는 손실 50억 원 전액을 <strong>즉시 당기 비용으로 인식</strong>해야 합니다 (진행률 비례 인식 아님).</p>
+    </div>
+
+    <h3 class="section-h">Variation Order·Claim의 수익 인식 시점</h3>
+    <ul class="bullet">
+      <li><strong>승인된 Change Order</strong> — 계약금액에 즉시 반영, 정상적으로 진행률 계산에 포함</li>
+      <li><strong>미승인 Variation Order</strong> — 원칙적으로 수익인식 불가. 협상 진행 상황에 대한 주석 공시만 가능</li>
+      <li><strong>Claim</strong> — "받을 가능성이 매우 높고(highly probable) 금액 추정이 가능"한 경우에 한해서만 제한적으로 인식. 실무에서는 가장 보수적으로 처리하는 항목</li>
+    </ul>
+
+    <div class="callout callout-navy">
+      <span class="callout-label">연결회계(GR) 관점 연계</span>
+      <p>다수 현장법인을 보유한 그룹사의 경우, 각 현장법인의 POC 수익인식이 연결 시 내부거래(IC) 제거와 맞물립니다. 특히 그룹 내 EPC 계열사가 그룹 내 다른 계열사 프로젝트를 수행하는 경우(내부 도급), 진행기준 매출 전체가 연결 조정 대상이 됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 7 ═══════════ -->
+  <section class="chapter" id="ch7">
+    <div class="chapter-head">
+      <span class="chapter-num">07</span>
+      <h2 class="chapter-title">End-to-End 프로세스와 SAP 통합 구조</h2>
+    </div>
+    <p class="chapter-lede">지금까지 다룬 모든 개념(WBS, 원가, 기성, 계약, 수익인식)이 하나의 업무 흐름 속에서 어떻게 연결되는지, 그리고 어떤 SAP 모듈이 각 단계를 지원하는지 정리합니다.</p>
+
+    <h3 class="section-h">Business Flow — 영업에서 회계마감까지</h3>
+    <div class="flow flow-vertical">
+      <div class="flow-step">영업 (수주활동)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">계약 (원도급 계약 체결)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">프로젝트 생성 (WBS/Network 마스터 데이터)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">구매 (PR/PO 발행 — Commitment 인식)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">자재 (입고/출고, 현장 자재관리)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">원가 (실적원가 집계, WBS별 귀속)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">기성 (진행률 산정, 기성청구서 발행)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">청구 (발주처 세금계산서 발행, 채권 관리)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">수익인식 (IFRS 15 POC 적용)</div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step">회계마감 (재무제표 반영, 연결 대상 시 GR 연계)</div>
+    </div>
+
+    <h3 class="section-h">Business Flow ↔ SAP 모듈 매핑</h3>
+    <table class="data-table">
+      <tr><th>Business Flow 단계</th><th>SAP 모듈</th><th>핵심 기능</th></tr>
+      <tr><td>계약 / 프로젝트 생성</td><td><strong>PS</strong> (Project System)</td><td>WBS, Network, Budget, Availability Control</td></tr>
+      <tr><td>구매 / 자재</td><td><strong>MM</strong> (Materials Management)</td><td>PR/PO, 입고, Commitment 연동</td></tr>
+      <tr><td>원가</td><td><strong>CO</strong> (Controlling)</td><td>원가센터, 원가요소, 배부(Allocation)</td></tr>
+      <tr><td>기성 / 청구</td><td><strong>SD</strong> (Sales &amp; Distribution)</td><td>기성청구서(Billing), 채권 관리</td></tr>
+      <tr><td>수익인식 / 회계마감</td><td><strong>FI</strong> (Financial Accounting)</td><td>POC 회계처리, 충당금, 재무제표</td></tr>
+      <tr><td>중장비/설비</td><td><strong>AA</strong> (Asset Accounting)</td><td>감가상각, 내부사용료 산정</td></tr>
+    </table>
+
+    <div class="callout callout-navy">
+      <span class="callout-label">통합의 핵심</span>
+      <p>건설 ERP 구축의 난이도는 개별 모듈의 복잡성이 아니라, PS를 중심으로 MM-SD-CO-FI-AA가 끊김 없이 연동되어야 한다는 점에 있습니다. 하나라도 끊기면 (예: MM의 Commitment가 PS Budget에 반영되지 않으면) Availability Control 전체가 무력화됩니다.</p>
+    </div>
+
+    <h3 class="section-h">연결회계(GR) 관점 — 다수 현장법인 연결 시 고려사항</h3>
+    <ul class="bullet">
+      <li>해외 현장법인(SPC, 지점)별로 별도 법인 코드를 사용하는 경우, 각 법인의 POC 수익인식 결과가 GR(Group Reporting)로 취합됨</li>
+      <li>그룹 내 계열사간 EPC 도급(내부거래)의 경우, 진행기준 매출 전체가 IC 제거 대상 — 단순 매출/매입 상계가 아니라 미실현손익 분석 필요</li>
+      <li>다국적 프로젝트의 경우 외화환산 차이가 진행률 계산에 미치는 영향을 사전에 설계해야 함 (기능통화 vs 표시통화 이슈)</li>
+    </ul>
+
+    <div class="drill">
+      <div class="drill-head" onclick="toggleDrill(this)">
+        <span>심화 — 해외 EPC 프로젝트의 Multi-Currency 처리</span>
+        <span class="drill-icon">+</span>
+      </div>
+      <div class="drill-body">
+        <p>해외 플랜트 프로젝트는 보통 복수 통화로 계약됩니다 (예: 설계비는 USD, 현지 시공비는 현지통화).</p>
+        <ul class="bullet">
+          <li>프로젝트 통화(Project Currency)와 회사 통화(Company Code Currency)를 별도 설정</li>
+          <li>WBS Element별로 거래통화가 다를 수 있어, 원가집계 시 환산 기준일 통일 필요</li>
+          <li>진행률(원가기준) 계산 시 환율 변동이 진행률 자체를 왜곡시키지 않도록 환산통화 기준을 명확히 설계</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 8 ═══════════ -->
+  <section class="chapter" id="ch8">
+    <div class="chapter-head">
+      <span class="chapter-num">08</span>
+      <h2 class="chapter-title">실무 Pitfalls</h2>
+    </div>
+    <p class="chapter-lede">건설 ERP 구축 프로젝트에서 반복적으로 발생하는 실패 패턴입니다. Fit-Gap 단계에서 이러한 리스크를 사전에 짚어야 합니다.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">⚠ WBS 과설계</div>
+        <p style="margin-bottom:0;">관리 편의를 위해 WBS 레벨을 지나치게 세분화하면, 현장 입력 부담이 폭증하여 결국 데이터 품질이 떨어집니다. "관리하고 싶은 단위"가 아니라 "현장에서 입력 가능한 단위"가 설계 기준이 되어야 합니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">⚠ WBS 과소설계</div>
+        <p style="margin-bottom:0;">반대로 너무 단순하게 설계하면 공종별 원가 비교나 손익 분석이 불가능해집니다. 추후 레벨 추가는 마이그레이션 부담이 크므로 초기 설계가 결정적입니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">⚠ 진행률 오류</div>
+        <p style="margin-bottom:0;">총예정원가 재추정이 누락되거나 지연되면 진행률이 왜곡되어 수익인식이 부정확해집니다. 정기적인(통상 월별) 총예정원가 재검토 프로세스가 필수입니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">⚠ 현장 입력 지연</div>
+        <p style="margin-bottom:0;">현장 PM·공무팀이 시스템 입력보다 실제 시공에 우선순위를 두는 경우가 많아, 원가 마감 시점에 데이터가 누락되는 경우가 빈번합니다. 입력 마감 데드라인과 인센티브 설계가 병행되어야 합니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">⚠ 계약변경 관리 미흡</div>
+        <p style="margin-bottom:0;">Change Order가 시스템(Budget Revision)에 즉시 반영되지 않으면, Availability Control이 실제 계약 상황과 어긋나 오작동하거나 무력화됩니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--wrong);">⚠ 마감 실패 사례</div>
+        <p style="margin-bottom:0;">원가-기성-수익인식의 마감 순서가 꼬이면(예: 원가 마감 전 수익인식 처리) 재작업이 반복됩니다. 마감 캘린더 상 단계별 선후관계를 명확히 정의해야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-label">현장 vs 시스템의 괴리</span>
+      <p>건설 ERP 실패 사례의 상당수는 기술적 문제가 아니라 "현장은 시스템을 입력 부담으로 인식하고, 본사는 시스템을 통제 수단으로 인식하는" 인식 차이에서 비롯됩니다. Fit-Gap 단계에서부터 현장 사용자의 입력 편의성을 설계 기준에 포함시켜야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ CHAPTER 9 ═══════════ -->
+  <section class="chapter" id="ch9">
+    <div class="chapter-head">
+      <span class="chapter-num">09</span>
+      <h2 class="chapter-title">Fit-Gap Checklist</h2>
+    </div>
+    <p class="chapter-lede">건설·EPC 고객 대상 Fit-Gap 분석 단계에서 반드시 확인해야 할 질문 리스트입니다. 영역별로 체크하며 진행하세요.</p>
+
+    <h3 class="section-h">프로젝트 구조</h3>
+    <ul class="checklist">
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>WBS 설계 기준이 공종 중심인가, 공정 중심인가, 혼합인가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>WBS 레벨 깊이는 현장 입력 역량을 고려해 설계되었는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>다수 현장(Multi-site)을 동시에 운영하는가? 현장간 공통 코드 체계가 있는가?</span></li>
+    </ul>
+
+    <h3 class="section-h">계약</h3>
+    <ul class="checklist">
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>주력 계약 유형이 Lump Sum인가, Unit Price인가, 혼합인가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>Variation Order/Claim의 승인 워크플로가 시스템화되어 있는가, 수기 관리인가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>JV(공동도급) 프로젝트가 있는가? 지분율 기준 비용·수익 배분 로직이 필요한가?</span></li>
+    </ul>
+
+    <h3 class="section-h">Budget</h3>
+    <ul class="checklist">
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>Availability Control을 Warning 단계로 운영할 것인가, Error(차단) 단계까지 적용할 것인가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>Change Order 발생 시 Budget Revision 승인 프로세스가 정의되어 있는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>중장비 내부사용료 산정 기준이 마련되어 있는가?</span></li>
+    </ul>
+
+    <h3 class="section-h">Progress</h3>
+    <ul class="checklist">
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>진행률 산정 방식이 원가기준인가, 산출기준인가? 공종별로 다른 방식을 쓰는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>총예정원가 재추정 주기와 책임자가 명확한가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>유보금(Retention) 관리를 위한 별도 채권/채무 계정 분리가 필요한가?</span></li>
+    </ul>
+
+    <h3 class="section-h">Revenue</h3>
+    <ul class="checklist">
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>POC 수익인식이 SAP에서 자동화될 영역과 수동 조정이 필요한 영역이 구분되어 있는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>예상손실 충당금 인식 기준과 모니터링 주기가 정의되어 있는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>다수 통화로 계약되는 프로젝트가 있는가? 환산 기준 통화가 정의되어 있는가?</span></li>
+    </ul>
+
+    <h3 class="section-h">Closing</h3>
+    <ul class="checklist">
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>원가-기성-수익인식 마감 순서와 데드라인이 마감 캘린더에 명시되어 있는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>다수 현장법인을 보유한 경우, 연결(GR) 마감과 개별 현장 마감의 일정이 정합되는가?</span></li>
+      <li><input type="checkbox" onchange="toggleCheck(this)"><span>그룹 내부 EPC 도급(내부거래) 발생 시 IC 제거 프로세스가 정의되어 있는가?</span></li>
+    </ul>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">9</div>
+        <div class="stat-label">총 챕터 수</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">6</div>
+        <div class="stat-label">통합 SAP 모듈 (PS·MM·SD·CO·FI·AA)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">18</div>
+        <div class="stat-label">Fit-Gap 체크포인트</div>
+      </div>
+    </div>
+
+    <div class="callout callout-correct">
+      <span class="callout-label">모듈 완료</span>
+      <p>본 교육 모듈은 건설·엔지니어링 ERP의 비즈니스 본질(프로젝트 중심 회계)부터 SAP PS 기반 구현 방법론, 실무 Pitfalls, Fit-Gap 체크리스트까지 다루었습니다. ASPN Engineering의 PJT-2024-017 시나리오를 통해 WBS 설계, 원가관리, 기성관리, 계약변경, IFRS 15 수익인식이 어떻게 하나의 흐름으로 연결되는지 확인했습니다.</p>
+    </div>
+
+    <div class="ch-footer-nav">
+      <a href="#ch1" class="ch-nav-btn">← 처음으로</a>
+      <a href="#navTabs" class="ch-nav-btn">목차 ↑</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-copy">© ASPN BAC사업부 · 교육 자료 포털 · LOB 심화 학습 시리즈</div>
+  <div class="footer-tag">INTERNAL USE ONLY</div>
+</footer>
+
+<script>
+  // Quiz logic
+  function checkQuiz(btn, isCorrect) {
+    const quiz = btn.closest('.quiz');
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    const feedback = quiz.querySelector('.quiz-feedback');
+    if (quiz.dataset.answered === 'true') return;
+    quiz.dataset.answered = 'true';
+    opts.forEach(o => o.disabled = true);
+    if (isCorrect) {
+      btn.classList.add('correct');
+      feedback.textContent = '정답입니다. WBS는 관리 목적과 현장 입력 부담 사이의 균형으로 설계됩니다.';
+      feedback.classList.add('show', 'correct-fb');
+    } else {
+      btn.classList.add('wrong');
+      feedback.textContent = '다시 생각해보세요. 단일 기준만으로는 원가 통제와 마일스톤 관리를 동시에 만족시키기 어렵습니다.';
+      feedback.classList.add('show', 'wrong-fb');
+      // highlight correct
+      opts.forEach(o => {
+        if (o.onclick.toString().includes('true')) o.classList.add('correct');
+      });
+    }
+  }
+
+  // Drill toggle
+  function toggleDrill(head) {
+    head.classList.toggle('open');
+    const body = head.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  // Checklist
+  function toggleCheck(checkbox) {
+    const label = checkbox.parentElement;
+    label.classList.toggle('checked-label', checkbox.checked);
+  }
+
+  // Sticky nav active state on scroll
+  const sections = document.querySelectorAll('.chapter');
+  const navLinks = document.querySelectorAll('.nav-tab');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-140px 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
