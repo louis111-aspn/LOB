@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.06 End-to-End Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#003366; --navy-dark:#001f3f; --bg:#f0f3f8; --card-bg:#ffffff;
+    --text:#1c2833; --text-mute:#5b6b7c; --border:#d8e0ea;
+    --warn:#a15c00; --warn-bg:#fff4e0;
+    --correct:#0f6b3c; --correct-bg:#e6f6ee;
+    --wrong:#a4272c; --wrong-bg:#fdeaea;
+    --font-display:'DM Serif Display', 'Noto Sans KR', serif;
+    --font-body:'Noto Sans KR', sans-serif;
+    --font-mono:'JetBrains Mono', 'Noto Sans KR', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{overflow-x:clip; scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:15px; line-height:1.7; word-break:keep-all; overflow-x:clip;}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
+
+  header.hero{background:linear-gradient(135deg, var(--navy-dark), var(--navy)); color:#fff; padding:56px 0 40px;}
+  .eyebrow{font-family:var(--font-mono); font-size:13px; letter-spacing:.12em; color:#9fc1e6; text-transform:uppercase; margin-bottom:14px;}
+  h1{font-family:var(--font-display); font-size:42px; font-weight:400; line-height:1.25; margin-bottom:16px;}
+  .hero-sub{font-size:16px; color:#cfe0f2; max-width:680px;}
+  .hero-meta{margin-top:28px; display:flex; gap:28px; flex-wrap:wrap; font-size:13px; color:#a9c5e2;}
+  .hero-meta b{color:#fff; font-weight:700;}
+
+  nav.tabs{position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(0,51,102,.06);}
+  nav.tabs .wrap{display:flex; gap:2px; overflow-x:auto; padding:0 24px;}
+  nav.tabs a{flex:0 0 auto; font-size:14px; font-weight:700; color:var(--text-mute); padding:16px 14px; text-decoration:none; border-bottom:3px solid transparent; white-space:nowrap; transition:.15s;}
+  nav.tabs a:hover{color:var(--navy);}
+  nav.tabs a.active{color:var(--navy); border-bottom-color:var(--navy);}
+
+  main{padding:48px 0 100px;}
+  section{margin-bottom:64px; scroll-margin-top:64px;}
+  .section-num{font-family:var(--font-mono); font-size:13px; font-weight:600; color:var(--navy); letter-spacing:.06em;}
+  .section-title{font-family:var(--font-display); font-size:30px; font-weight:400; color:var(--navy-dark); margin:8px 0 24px;}
+  h3.sub{font-size:16px; font-weight:700; color:var(--navy-dark); margin:28px 0 12px;}
+  p{margin-bottom:14px; color:var(--text);}
+  ul.plain, ol.plain{margin:0 0 14px 20px;}
+  ul.plain li, ol.plain li{margin-bottom:6px;}
+
+  .card{background:var(--card-bg); border:1px solid var(--border); border-radius:6px; padding:24px 28px; margin-bottom:18px;}
+  .card-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:720px){.card-grid{grid-template-columns:1fr;}}
+
+  .callout{border-left:4px solid var(--navy); background:#eef3f9; padding:16px 20px; border-radius:0 4px 4px 0; margin:18px 0; font-size:14px;}
+  .callout.warn{border-color:var(--warn); background:var(--warn-bg);}
+  .callout.correct{border-color:var(--correct); background:var(--correct-bg);}
+  .callout.wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .callout .tag{font-family:var(--font-mono); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:6px; color:var(--navy);}
+  .callout.warn .tag{color:var(--warn);}
+  .callout.correct .tag{color:var(--correct);}
+  .callout.wrong .tag{color:var(--wrong);}
+
+  .flow{display:flex; flex-wrap:wrap; align-items:center; gap:0; margin:24px 0;}
+  .flow-step{background:#fff; border:1.5px solid var(--navy); border-radius:6px; padding:10px 14px; font-size:13px; font-weight:700; color:var(--navy-dark); text-align:center; min-width:100px;}
+  .flow-step.hl{background:var(--navy); color:#fff;}
+  .flow-step.mute{border-style:dashed; color:var(--text-mute); border-color:var(--text-mute);}
+  .flow-step.wrong-b{border-color:var(--wrong); color:var(--wrong);}
+  .flow-arrow{font-family:var(--font-mono); color:var(--text-mute); padding:0 6px; font-size:15px;}
+  .flow-wrap-note{font-size:12px; color:var(--text-mute); margin-top:8px; font-family:var(--font-mono);}
+
+  table.cmp{width:100%; border-collapse:collapse; font-size:14px; margin:18px 0;}
+  table.cmp th, table.cmp td{border:1px solid var(--border); padding:12px 14px; text-align:left; vertical-align:top;}
+  table.cmp th{background:var(--navy); color:#fff; font-weight:700; font-size:13px;}
+  table.cmp tr:nth-child(even) td{background:#f7f9fc;}
+  table.cmp td.label{font-weight:700; color:var(--navy-dark); white-space:nowrap;}
+  table.cmp td.num, table.cmp th.num{text-align:right; font-family:var(--font-mono);}
+
+  .checklist{list-style:none; margin:0;}
+  .checklist li{display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{margin-top:3px; width:16px; height:16px; accent-color:var(--navy); flex:0 0 auto;}
+
+  .quiz{background:#fff; border:1px solid var(--border); border-radius:6px; padding:24px 28px;}
+  .quiz .q{font-weight:700; margin-bottom:14px; color:var(--navy-dark);}
+  .quiz .opts{display:flex; flex-direction:column; gap:8px;}
+  .quiz .opt{border:1.5px solid var(--border); border-radius:5px; padding:11px 16px; cursor:pointer; font-size:14px; transition:.12s; background:#fafcfe;}
+  .quiz .opt:hover{border-color:var(--navy);}
+  .quiz .opt.selected-correct{border-color:var(--correct); background:var(--correct-bg); font-weight:700;}
+  .quiz .opt.selected-wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .quiz .feedback{margin-top:14px; font-size:13.5px; padding:12px 16px; border-radius:5px; display:none;}
+  .quiz .feedback.show{display:block;}
+  .quiz .feedback.correct{background:var(--correct-bg); color:var(--correct);}
+  .quiz .feedback.wrong{background:var(--wrong-bg); color:var(--wrong);}
+
+  .drill{border:1px solid var(--border); border-radius:6px; margin:14px 0; overflow:hidden;}
+  .drill summary{padding:14px 20px; cursor:pointer; font-weight:700; color:var(--navy-dark); background:#f7f9fc; list-style:none; display:flex; justify-content:space-between; align-items:center; font-size:14px;}
+  .drill summary::-webkit-details-marker{display:none;}
+  .drill summary::after{content:'+'; font-family:var(--font-mono); font-size:18px; color:var(--navy);}
+  .drill[open] summary::after{content:'–';}
+  .drill .drill-body{padding:18px 20px; font-size:14px; border-top:1px solid var(--border);}
+
+  .footer-nav{display:flex; justify-content:space-between; align-items:center; padding:28px 0; border-top:1px solid var(--border); margin-top:20px;}
+  .footer-nav a{font-size:13px; font-weight:700; color:var(--navy); text-decoration:none; font-family:var(--font-mono);}
+  .footer-nav a:hover{text-decoration:underline;}
+
+  .label-sm{font-family:var(--font-mono); font-size:13px; color:var(--text-mute); letter-spacing:.02em;}
+  .calc-box{background:#fafcfe; border:1px solid var(--border); border-radius:6px; padding:16px 20px; font-family:var(--font-mono); font-size:13.5px; margin:12px 0; line-height:1.9;}
+  .calc-box .result{color:var(--navy); font-weight:700;}
+
+  /* ===== TIMELINE (case study steps) ===== */
+  .timeline{position:relative; margin:32px 0; padding-left:36px;}
+  .timeline::before{content:''; position:absolute; left:13px; top:6px; bottom:6px; width:2px; background:var(--border);}
+  .step{position:relative; margin-bottom:28px;}
+  .step::before{
+    content:attr(data-n); position:absolute; left:-36px; top:0;
+    width:28px; height:28px; border-radius:50%; background:var(--navy); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:12px; font-weight:700;
+  }
+  .step-title{font-size:16px; font-weight:700; color:var(--navy-dark); margin-bottom:6px;}
+  .step-ref{font-family:var(--font-mono); font-size:11px; color:var(--text-mute); margin-left:8px; font-weight:400;}
+  .step-body{background:#fff; border:1px solid var(--border); border-radius:6px; padding:16px 20px; font-size:14px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">SAP IS-U 시리즈 · Chapter 06 / 06 (최종)</div>
+    <h1>End-to-End Case Study</h1>
+    <p class="hero-sub">신규 고객 가입부터 계량기 교체, 이사(Move-out)까지 — Ch.01~05에서 배운 모든 개념을 하나의 이야기로 연결합니다.</p>
+    <div class="hero-meta">
+      <span><b>시나리오 법인</b> ASPN Energy Korea (K300)</span>
+      <span><b>고객</b> 이지은 (개인, 주거용 전력)</span>
+      <span><b>이전 챕터</b> Ch.05 FI-CA Integration</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <a href="#intro" class="active">01 시나리오</a>
+    <a href="#phase1">02 가입~설치</a>
+    <a href="#phase2">03 검침~청구</a>
+    <a href="#phase3">04 수납~체납</a>
+    <a href="#phase4">05 교체~종료</a>
+    <a href="#summary">06 전체 흐름</a>
+    <a href="#check">07 최종 점검</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===================== 01 SCENARIO ===================== -->
+  <section id="intro">
+    <div class="section-num">01</div>
+    <h2 class="section-title">시나리오 설정</h2>
+
+    <p>서울 소재 오피스텔에 새로 입주하는 <b>이지은</b>님이 ASPN Energy Korea(K300)에 전력 공급을 신청합니다. 이 고객의 계약 시작부터 이사(Move-out)까지 전체 라이프사이클을 13단계로 따라가며, 각 단계가 어느 챕터의 개념에 해당하는지 함께 표시합니다.</p>
+
+    <div class="card">
+      <h3 class="sub" style="margin-top:0;">시나리오 개요</h3>
+      <table class="cmp" style="margin-bottom:0;">
+        <tr><td class="label" style="width:24%;">고객</td><td>이지은 (개인)</td></tr>
+        <tr><td class="label">공급 지점</td><td>서울시 소재 오피스텔 건물 1205호</td></tr>
+        <tr><td class="label">Division</td><td>전력</td></tr>
+        <tr><td class="label">Rate Category</td><td>주택용 (3단계 누진: 0~200kWh 100원, 201~400kWh 200원, 400kWh 초과 300원)</td></tr>
+        <tr><td class="label">기간</td><td>계약 시작(1개월 차) → 2개월 차 체납 발생 → 계량기 교체 → 3개월 차 이사</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== 02 PHASE 1: 가입~설치 ===================== -->
+  <section id="phase1">
+    <div class="section-num">02</div>
+    <h2 class="section-title">Phase 1 — 가입 &amp; 설비 구성</h2>
+
+    <div class="timeline">
+      <div class="step" data-n="1">
+        <div class="step-title">Business Partner 생성 <span class="step-ref">Ch.02</span></div>
+        <div class="step-body">이지은님의 신원 정보(성명, 연락처, 주소)로 Business Partner를 생성합니다. 이 BP는 이후 모든 프로세스의 출발점이 됩니다.</div>
+      </div>
+      <div class="step" data-n="2">
+        <div class="step-title">Contract Account 생성 <span class="step-ref">Ch.02</span></div>
+        <div class="step-body">이지은님의 청구·수납을 관리할 Contract Account를 생성합니다. 이후 Payment Lot, Dunning 등 모든 재무 프로세스가 이 CA 단위로 처리됩니다.</div>
+      </div>
+      <div class="step" data-n="3">
+        <div class="step-title">Contract 생성 <span class="step-ref">Ch.02</span></div>
+        <div class="step-body">Division "전력"에 대한 공급 계약을 생성하여, BP+CA(재무 축)와 앞으로 만들 Installation(물리적 축)을 연결할 준비를 합니다.</div>
+      </div>
+      <div class="step" data-n="4">
+        <div class="step-title">Connection Object / Premise 생성 <span class="step-ref">Ch.02</span></div>
+        <div class="step-body">오피스텔 건물을 Connection Object로, 1205호를 그 하위 Premise로 생성합니다. 같은 건물의 다른 호실들도 동일한 Connection Object 아래 각각 별도 Premise로 존재합니다.</div>
+      </div>
+      <div class="step" data-n="5">
+        <div class="step-title">Installation 생성 <span class="step-ref">Ch.02, Ch.04</span></div>
+        <div class="step-body">1205호의 전력 공급을 담당할 Installation을 생성하고, 여기에 <b>주택용 Rate Category</b>를 할당합니다. Ch.02에서 강조했듯 Rate가 실제로 붙는 지점이 바로 이 Installation입니다.</div>
+      </div>
+      <div class="step" data-n="6">
+        <div class="step-title">Device Install <span class="step-ref">Ch.03</span></div>
+        <div class="step-body">Installation에 전력 계량기(Device)를 설치하고, 단일 Register(주택용 일반 요금)를 구성합니다. 초기 검침값(Opening Reading)은 0kWh로 기록됩니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 03 PHASE 2: 검침~청구 ===================== -->
+  <section id="phase2">
+    <div class="section-num">03</div>
+    <h2 class="section-title">Phase 2 — 검침 &amp; 청구 (1개월 차)</h2>
+
+    <div class="timeline">
+      <div class="step" data-n="7">
+        <div class="step-title">Meter Reading <span class="step-ref">Ch.03</span></div>
+        <div class="step-body">1개월 차 검침 결과, 사용량 <b>350kWh</b>가 확인됩니다.</div>
+      </div>
+      <div class="step" data-n="8">
+        <div class="step-title">Billing <span class="step-ref">Ch.04</span></div>
+        <div class="step-body">
+          <p style="margin-bottom:8px;">주택용 3단계 누진 구조에 따라 계산합니다.</p>
+          <div class="calc-box" style="margin:0;">
+            1구간: 200kWh × 100원 = 20,000원<br>
+            2구간: (350−200)kWh × 200원 = 150kWh × 200원 = 30,000원<br>
+            ─────────────────────────<br>
+            1개월 차 청구액 = <span class="result">50,000원</span>
+          </div>
+        </div>
+      </div>
+      <div class="step" data-n="9">
+        <div class="step-title">Invoicing <span class="step-ref">Ch.04</span></div>
+        <div class="step-body">Billing 결과 50,000원을 청구서(Invoice) 문서로 생성하여 이지은님에게 발송합니다. Billing(계산)과 Invoicing(문서화)이 별개 단계임을 다시 확인할 수 있는 지점입니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 04 PHASE 3: 수납~체납 ===================== -->
+  <section id="phase3">
+    <div class="section-num">04</div>
+    <h2 class="section-title">Phase 3 — 수납 &amp; 체납 (2개월 차)</h2>
+
+    <div class="timeline">
+      <div class="step" data-n="10">
+        <div class="step-title">Payment <span class="step-ref">Ch.05</span></div>
+        <div class="step-body">
+          <p style="margin-bottom:8px;">1개월 차 청구액(50,000원)은 정상적으로 자동이체로 수납되어 Payment Lot을 통해 Clearing 처리됩니다.</p>
+          <p style="margin-bottom:0;">그러나 2개월 차 검침 결과 사용량이 늘어 <b>420kWh</b>가 확인되고, Billing 결과는 다음과 같습니다.</p>
+          <div class="calc-box">
+            1구간: 200kWh × 100원 = 20,000원<br>
+            2구간: 200kWh × 200원 = 40,000원<br>
+            3구간: (420−400)kWh × 300원 = 20kWh × 300원 = 6,000원<br>
+            ─────────────────────────<br>
+            2개월 차 청구액 = <span class="result">66,000원</span>
+          </div>
+          <p style="margin-bottom:0;">이번에는 계좌 잔액 부족으로 자동이체가 <b>Return(반환)</b> 처리되어, Clearing되었던 채권이 다시 열립니다(Reopen).</p>
+        </div>
+      </div>
+      <div class="step" data-n="11">
+        <div class="step-title">Dunning <span class="step-ref">Ch.05</span></div>
+        <div class="step-body">납기 경과 후, 66,000원 채권에 대해 1단계 Dunning(안내성 독촉장)이 발송됩니다. 이지은님이 자금 사정으로 일시 납부가 어렵다고 연락해와, 66,000원을 <b>2개월 Installment Plan</b>(회차당 33,000원)으로 재구성합니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 05 PHASE 4: 교체~종료 ===================== -->
+  <section id="phase4">
+    <div class="section-num">05</div>
+    <h2 class="section-title">Phase 4 — 계량기 교체 &amp; 계약 종료</h2>
+
+    <div class="timeline">
+      <div class="step" data-n="12">
+        <div class="step-title">Meter Replacement (PM 연계) <span class="step-ref">Ch.03</span></div>
+        <div class="step-body">정기 점검 중 계량기 이상 신호가 감지되어 PM Notification이 생성되고, PM Work Order를 통해 계량기 교체가 이루어집니다. 교체 이력은 IS-U의 Device 이력(기존 계량기 Remove + 신규 계량기 Install)으로 갱신됩니다. Ch.03에서 강조했듯, 이 매핑의 정확한 설계 방식은 프로젝트마다 다를 수 있습니다.</div>
+      </div>
+      <div class="step" data-n="13">
+        <div class="step-title">Final Bill / Move-out <span class="step-ref">Ch.02, Ch.04</span></div>
+        <div class="step-body">3개월 차, 이지은님이 다른 지역으로 이사하며 Move-out을 신청합니다. 이사 시점 기준 최종 검침(Final Reading)이 실시되고, 그 기간에 대한 Final Bill이 산출되어 청구·정산된 후 Contract와 Installation의 연결이 종료됩니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 06 FULL FLOW SUMMARY ===================== -->
+  <section id="summary">
+    <div class="section-num">06</div>
+    <h2 class="section-title">전체 흐름 한눈에 보기</h2>
+
+    <div class="flow">
+      <div class="flow-step">BP</div><span class="flow-arrow">→</span>
+      <div class="flow-step">CA</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Contract</div><span class="flow-arrow">→</span>
+      <div class="flow-step">CO/Premise</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Installation</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Device</div>
+    </div>
+    <div class="flow">
+      <div class="flow-step">Meter<br>Reading</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Billing</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Invoicing</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Payment</div><span class="flow-arrow">→</span>
+      <div class="flow-step wrong-b">Return</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Dunning /<br>Installment</div>
+    </div>
+    <div class="flow">
+      <div class="flow-step">Meter<br>Replacement</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">Final Bill /<br>Move-out</div>
+    </div>
+    <p class="flow-wrap-note">위 3줄이 이지은님의 3개월 라이프사이클 전체입니다.</p>
+
+    <div class="callout correct">
+      <span class="tag">시리즈 총정리</span>
+      Ch.01의 아키텍처(FI-CA), Ch.02의 마스터 데이터 계층, Ch.03의 검침·PM 연계, Ch.04의 요금 계산 로직, Ch.05의 채권 관리 프로세스가 하나의 고객 여정 안에서 어떻게 순차적으로 맞물리는지 이번 케이스로 확인했습니다.
+    </div>
+  </section>
+
+  <!-- ===================== 07 FINAL CHECK ===================== -->
+  <section id="check">
+    <div class="section-num">07</div>
+    <h2 class="section-title">최종 점검</h2>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q1. 2개월 차 사용량 420kWh에 대한 올바른 청구액은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">42,000원 (420kWh × 100원)</div>
+        <div class="opt" data-correct="false">84,000원 (420kWh × 200원)</div>
+        <div class="opt" data-correct="true">66,000원 (20,000 + 40,000 + 6,000)</div>
+        <div class="opt" data-correct="false">126,000원 (420kWh × 300원)</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q2. 자동이체 Return 발생 시 66,000원 채권의 상태는?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">이미 Clearing되었으므로 그대로 소멸 상태를 유지한다</div>
+        <div class="opt" data-correct="true">Clearing이 취소되며 채권이 다시 열린다(Reopen)</div>
+        <div class="opt" data-correct="false">자동으로 Write-off 처리된다</div>
+        <div class="opt" data-correct="false">Business Partner가 삭제된다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="q">Q3. 이 케이스 스터디에서 Rate(주택용 누진요금)가 할당된 객체는?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">Connection Object</div>
+        <div class="opt" data-correct="false">Contract Account</div>
+        <div class="opt" data-correct="true">Installation</div>
+        <div class="opt" data-correct="false">Business Partner</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </section>
+
+  <h3 class="sub">시리즈 완료 체크리스트</h3>
+  <ul class="checklist">
+    <li><input type="checkbox"> BP → CA → Contract → CO/Premise → Installation → Device 순서로 신규 가입 프로세스를 설명할 수 있다</li>
+    <li><input type="checkbox"> Meter Reading → Billing → Invoicing이 별개 단계임을 사례를 들어 설명할 수 있다</li>
+    <li><input type="checkbox"> 누진요금 계산을 두 가지 다른 사용량(350kWh, 420kWh)에 대해 직접 수행할 수 있다</li>
+    <li><input type="checkbox"> Return 발생 시 채권이 Reopen되고, 이후 Dunning/Installment Plan으로 이어지는 흐름을 이해했다</li>
+    <li><input type="checkbox"> PM 연계(계량기 교체)와 Move-out(Final Bill)까지 전체 라이프사이클을 설명할 수 있다</li>
+  </ul>
+
+  <div class="callout">
+    <span class="tag">시리즈 완료</span>
+    SAP IS-U 6개 챕터 시리즈를 모두 완료했습니다. 대형 에너지·유틸리티 공기업 프로젝트에서 실제로 마주치게 될 핵심 객체(BP~Installation), 검침·요금 로직, 채권 관리 프로세스의 큰 그림을 갖추셨습니다. 필요 시 EDM Advanced 과정 등 후속 심화 모듈로 이어갈 수 있습니다.
+  </div>
+
+  <div class="footer-nav">
+    <a href="#">← Ch.05 FI-CA Integration</a>
+    <span class="label-sm">시리즈 종료</span>
+  </div>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('main section');
+  const tabs = document.querySelectorAll('nav.tabs a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if(rect.top <= 100) current = sec.id;
+    });
+    tabs.forEach(t => {
+      t.classList.toggle('active', t.getAttribute('href') === '#' + current);
+    });
+  });
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.opt');
+    const feedback = quiz.querySelector('.feedback');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if(quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        const isCorrect = opt.dataset.correct === 'true';
+        opt.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+        if(!isCorrect){
+          quiz.querySelector('.opt[data-correct="true"]').classList.add('selected-correct');
+        }
+        feedback.textContent = isCorrect ? '정답입니다.' : '오답입니다. 정답이 강조 표시되었습니다.';
+        feedback.classList.add('show', isCorrect ? 'correct' : 'wrong');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

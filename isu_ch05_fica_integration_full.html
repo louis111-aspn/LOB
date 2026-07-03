@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.05 FI-CA Integration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#003366; --navy-dark:#001f3f; --bg:#f0f3f8; --card-bg:#ffffff;
+    --text:#1c2833; --text-mute:#5b6b7c; --border:#d8e0ea;
+    --warn:#a15c00; --warn-bg:#fff4e0;
+    --correct:#0f6b3c; --correct-bg:#e6f6ee;
+    --wrong:#a4272c; --wrong-bg:#fdeaea;
+    --font-display:'DM Serif Display', 'Noto Sans KR', serif;
+    --font-body:'Noto Sans KR', sans-serif;
+    --font-mono:'JetBrains Mono', 'Noto Sans KR', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{overflow-x:clip; scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:15px; line-height:1.7; word-break:keep-all; overflow-x:clip;}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
+
+  header.hero{background:linear-gradient(135deg, var(--navy-dark), var(--navy)); color:#fff; padding:56px 0 40px;}
+  .eyebrow{font-family:var(--font-mono); font-size:13px; letter-spacing:.12em; color:#9fc1e6; text-transform:uppercase; margin-bottom:14px;}
+  h1{font-family:var(--font-display); font-size:42px; font-weight:400; line-height:1.25; margin-bottom:16px;}
+  .hero-sub{font-size:16px; color:#cfe0f2; max-width:680px;}
+  .hero-meta{margin-top:28px; display:flex; gap:28px; flex-wrap:wrap; font-size:13px; color:#a9c5e2;}
+  .hero-meta b{color:#fff; font-weight:700;}
+
+  nav.tabs{position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(0,51,102,.06);}
+  nav.tabs .wrap{display:flex; gap:2px; overflow-x:auto; padding:0 24px;}
+  nav.tabs a{flex:0 0 auto; font-size:14px; font-weight:700; color:var(--text-mute); padding:16px 14px; text-decoration:none; border-bottom:3px solid transparent; white-space:nowrap; transition:.15s;}
+  nav.tabs a:hover{color:var(--navy);}
+  nav.tabs a.active{color:var(--navy); border-bottom-color:var(--navy);}
+
+  main{padding:48px 0 100px;}
+  section{margin-bottom:64px; scroll-margin-top:64px;}
+  .section-num{font-family:var(--font-mono); font-size:13px; font-weight:600; color:var(--navy); letter-spacing:.06em;}
+  .section-title{font-family:var(--font-display); font-size:30px; font-weight:400; color:var(--navy-dark); margin:8px 0 24px;}
+  h3.sub{font-size:16px; font-weight:700; color:var(--navy-dark); margin:28px 0 12px;}
+  p{margin-bottom:14px; color:var(--text);}
+  ul.plain, ol.plain{margin:0 0 14px 20px;}
+  ul.plain li, ol.plain li{margin-bottom:6px;}
+
+  .card{background:var(--card-bg); border:1px solid var(--border); border-radius:6px; padding:24px 28px; margin-bottom:18px;}
+  .card-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .card-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:720px){.card-grid{grid-template-columns:1fr;} .card-grid.cols-3{grid-template-columns:1fr;}}
+
+  .callout{border-left:4px solid var(--navy); background:#eef3f9; padding:16px 20px; border-radius:0 4px 4px 0; margin:18px 0; font-size:14px;}
+  .callout.warn{border-color:var(--warn); background:var(--warn-bg);}
+  .callout.correct{border-color:var(--correct); background:var(--correct-bg);}
+  .callout.wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .callout .tag{font-family:var(--font-mono); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:6px; color:var(--navy);}
+  .callout.warn .tag{color:var(--warn);}
+  .callout.correct .tag{color:var(--correct);}
+  .callout.wrong .tag{color:var(--wrong);}
+
+  .flow{display:flex; flex-wrap:wrap; align-items:center; gap:0; margin:24px 0;}
+  .flow-step{background:#fff; border:1.5px solid var(--navy); border-radius:6px; padding:10px 14px; font-size:13px; font-weight:700; color:var(--navy-dark); text-align:center; min-width:108px;}
+  .flow-step.hl{background:var(--navy); color:#fff;}
+  .flow-step.mute{border-style:dashed; color:var(--text-mute); border-color:var(--text-mute);}
+  .flow-step.wrong-b{border-color:var(--wrong); color:var(--wrong);}
+  .flow-arrow{font-family:var(--font-mono); color:var(--text-mute); padding:0 8px; font-size:16px;}
+  .flow-wrap-note{font-size:12px; color:var(--text-mute); margin-top:8px; font-family:var(--font-mono);}
+
+  table.cmp{width:100%; border-collapse:collapse; font-size:14px; margin:18px 0;}
+  table.cmp th, table.cmp td{border:1px solid var(--border); padding:12px 14px; text-align:left; vertical-align:top;}
+  table.cmp th{background:var(--navy); color:#fff; font-weight:700; font-size:13px;}
+  table.cmp tr:nth-child(even) td{background:#f7f9fc;}
+  table.cmp td.label{font-weight:700; color:var(--navy-dark); white-space:nowrap;}
+  table.cmp td.num, table.cmp th.num{text-align:right; font-family:var(--font-mono);}
+
+  .s4-note{border:1.5px dashed var(--navy); background:#f4f8fc; border-radius:6px; padding:18px 22px; margin:20px 0;}
+  .s4-note .badge{font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.06em; background:var(--navy); color:#fff; padding:3px 10px; border-radius:3px; display:inline-block; margin-bottom:10px;}
+
+  .checklist{list-style:none; margin:0;}
+  .checklist li{display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{margin-top:3px; width:16px; height:16px; accent-color:var(--navy); flex:0 0 auto;}
+
+  .quiz{background:#fff; border:1px solid var(--border); border-radius:6px; padding:24px 28px;}
+  .quiz .q{font-weight:700; margin-bottom:14px; color:var(--navy-dark);}
+  .quiz .opts{display:flex; flex-direction:column; gap:8px;}
+  .quiz .opt{border:1.5px solid var(--border); border-radius:5px; padding:11px 16px; cursor:pointer; font-size:14px; transition:.12s; background:#fafcfe;}
+  .quiz .opt:hover{border-color:var(--navy);}
+  .quiz .opt.selected-correct{border-color:var(--correct); background:var(--correct-bg); font-weight:700;}
+  .quiz .opt.selected-wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .quiz .feedback{margin-top:14px; font-size:13.5px; padding:12px 16px; border-radius:5px; display:none;}
+  .quiz .feedback.show{display:block;}
+  .quiz .feedback.correct{background:var(--correct-bg); color:var(--correct);}
+  .quiz .feedback.wrong{background:var(--wrong-bg); color:var(--wrong);}
+
+  .drill{border:1px solid var(--border); border-radius:6px; margin:14px 0; overflow:hidden;}
+  .drill summary{padding:14px 20px; cursor:pointer; font-weight:700; color:var(--navy-dark); background:#f7f9fc; list-style:none; display:flex; justify-content:space-between; align-items:center; font-size:14px;}
+  .drill summary::-webkit-details-marker{display:none;}
+  .drill summary::after{content:'+'; font-family:var(--font-mono); font-size:18px; color:var(--navy);}
+  .drill[open] summary::after{content:'–';}
+  .drill .drill-body{padding:18px 20px; font-size:14px; border-top:1px solid var(--border);}
+
+  .footer-nav{display:flex; justify-content:space-between; align-items:center; padding:28px 0; border-top:1px solid var(--border); margin-top:20px;}
+  .footer-nav a{font-size:13px; font-weight:700; color:var(--navy); text-decoration:none; font-family:var(--font-mono);}
+  .footer-nav a:hover{text-decoration:underline;}
+
+  .label-sm{font-family:var(--font-mono); font-size:13px; color:var(--text-mute); letter-spacing:.02em;}
+
+  .calc-box{background:#fafcfe; border:1px solid var(--border); border-radius:6px; padding:16px 20px; font-family:var(--font-mono); font-size:13.5px; margin:12px 0; line-height:1.9;}
+  .calc-box .result{color:var(--navy); font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">SAP IS-U 시리즈 · Chapter 05 / 06</div>
+    <h1>FI-CA Integration</h1>
+    <p class="hero-sub">청구된 금액이 채권으로 전기된 이후 — 수납, 체납 관리, 보증금, 분할납부, 대손 처리를 거쳐 총계정원장(FI)에 도달하기까지의 흐름입니다.</p>
+    <div class="hero-meta">
+      <span><b>시나리오 법인</b> ASPN Energy Korea (K300)</span>
+      <span><b>이전 챕터</b> Ch.04 Billing & Invoicing</span>
+      <span><b>다음 챕터</b> E2E Case Study</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <a href="#intro" class="active">01 도입</a>
+    <a href="#payment">02 Payment Lot</a>
+    <a href="#dunning">03 Dunning</a>
+    <a href="#collections">04 Collections</a>
+    <a href="#deposit">05 Security Deposit</a>
+    <a href="#installment">06 Installment Plan</a>
+    <a href="#return">07 Return</a>
+    <a href="#writeoff">08 Write-off</a>
+    <a href="#gl">09 GL Posting</a>
+    <a href="#s4">10 S/4HANA</a>
+    <a href="#check">11 이해도 점검</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===================== 01 INTRO ===================== -->
+  <section id="intro">
+    <div class="section-num">01</div>
+    <h2 class="section-title">청구서 발행 이후, 채권은 어떻게 관리되는가</h2>
+
+    <p>Ch.04에서 청구 금액이 확정되어 Invoicing까지 완료되면, 그 금액은 FI-CA Posting을 통해 <b>Contract Account 단위의 채권</b>으로 전기됩니다. Ch.01에서 언급했듯, 대형 유틸리티 프로젝트에서는 이 이후의 <b>Customer Financial Processing이 Billing보다 훨씬 오래, 훨씬 복잡하게</b> 이어지는 경우가 많습니다.</p>
+
+    <div class="flow">
+      <div class="flow-step mute">Invoicing<br>(Ch.04)</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">FI-CA<br>Posting</div><span class="flow-arrow">→</span>
+      <div class="flow-step">수납 /<br>체납 관리</div><span class="flow-arrow">→</span>
+      <div class="flow-step mute">FI (GL)</div>
+    </div>
+
+    <p>이 챕터는 정상 수납부터 최악의 경우(대손)까지, 채권이 거칠 수 있는 경로를 순서대로 다룹니다.</p>
+    <ul class="plain">
+      <li><b>정상 흐름</b>: Payment Lot(수납) → GL Posting</li>
+      <li><b>체납 발생 시</b>: Dunning(독촉) → Collections(채권관리) → Write-off(대손)</li>
+      <li><b>사전 리스크 관리</b>: Security Deposit(보증금)</li>
+      <li><b>고객 배려</b>: Installment Plan(분할납부)</li>
+      <li><b>수납 실패</b>: Return(반환/부도)</li>
+    </ul>
+  </section>
+
+  <!-- ===================== 02 PAYMENT LOT ===================== -->
+  <section id="payment">
+    <div class="section-num">02</div>
+    <h2 class="section-title">Payment Lot (수납 처리)</h2>
+
+    <p>Payment Lot은 은행 등에서 들어온 대량의 입금 데이터를 일괄로 처리하여, 각 Contract Account의 미수금과 매칭(Clearing)하는 프로세스입니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">입금 데이터<br>수신(은행 등)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Payment Lot<br>생성</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Contract Account<br>미수금 매칭</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">Clearing<br>(채권 소멸)</div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">일반화 주의</span>
+      모든 입금이 자동으로 매칭되는 것은 아닙니다. 입금자명 불일치, 금액 불일치 등으로 자동 매칭에 실패하는 <b>미확정 입금 건</b>이 발생할 수 있으며, 이 경우 수작업 또는 별도 로직으로 처리됩니다.
+    </div>
+  </section>
+
+  <!-- ===================== 03 DUNNING ===================== -->
+  <section id="dunning">
+    <div class="section-num">03</div>
+    <h2 class="section-title">Dunning (체납 독촉)</h2>
+
+    <p>납기 내 수납이 되지 않은 채권에 대해, 단계적으로 강도를 높여가며 고객에게 독촉하는 프로세스입니다. 일반적으로 여러 단계(Dunning Level)로 구성되며, 단계가 올라갈수록 조치의 강도가 높아집니다.</p>
+
+    <table class="cmp">
+      <tr><th style="width:18%;">단계</th><th>일반적 조치 예시</th></tr>
+      <tr><td class="label">1단계</td><td>안내성 독촉장 발송 (연체 알림)</td></tr>
+      <tr><td class="label">2단계</td><td>공식 독촉장 발송, 납부 기한 재통보</td></tr>
+      <tr><td class="label">3단계 이상</td><td>단전 예고, 단전 실행 등 강한 조치 (유틸리티 특화)</td></tr>
+    </table>
+
+    <div class="callout">
+      <span class="tag">유틸리티 특화 포인트</span>
+      일반 기업의 Dunning은 대부분 문서 발송에서 그치지만, 유틸리티에서는 최종 단계에서 <b>공급 중단(단전/단수)</b>이라는 물리적 조치로 이어질 수 있다는 점이 가장 큰 차이입니다. 다만 단전 실행 조건과 절차는 규제·법령의 영향을 크게 받는 영역으로, 프로젝트마다 상이하게 설계됩니다.
+    </div>
+  </section>
+
+  <!-- ===================== 04 COLLECTIONS ===================== -->
+  <section id="collections">
+    <div class="section-num">04</div>
+    <h2 class="section-title">Collections (채권 관리)</h2>
+
+    <p>Dunning으로도 해결되지 않는 장기 연체 건을 별도로 그룹핑하여 집중 관리하는 프로세스입니다. 연체 심각도에 따라 케이스를 분류하고, 담당자를 지정해 후속 조치를 추적합니다.</p>
+
+    <ul class="plain">
+      <li>연체 채권의 케이스화(Case) 및 우선순위 분류</li>
+      <li>담당자 배정 및 조치 이력 추적</li>
+      <li>Write-off(대손 처리) 여부를 최종 판단하는 전 단계</li>
+    </ul>
+  </section>
+
+  <!-- ===================== 05 SECURITY DEPOSIT ===================== -->
+  <section id="deposit">
+    <div class="section-num">05</div>
+    <h2 class="section-title">Security Deposit (보증금)</h2>
+
+    <p>신용도가 낮은 신규 고객이나 특정 요건에 해당하는 고객에게 계약 시점에 미리 징수하는 보증금입니다. 향후 체납이 발생했을 때 손실을 완화하는 사전적 리스크 관리 수단입니다.</p>
+
+    <div class="callout warn">
+      <span class="tag">일반화 주의</span>
+      "모든 신규 고객에게 보증금을 징수한다"고 일반화하지 않습니다. 보증금 징수 여부와 기준(신용평가 결과, 계약 종류 등)은 회사 정책과 규제 요건에 따라 프로젝트별로 다르게 설계됩니다.
+    </div>
+  </section>
+
+  <!-- ===================== 06 INSTALLMENT PLAN ===================== -->
+  <section id="installment">
+    <div class="section-num">06</div>
+    <h2 class="section-title">Installment Plan (분할납부)</h2>
+
+    <p>일시 납부가 어려운 고객의 채권을 여러 회차로 나누어 납부할 수 있도록 재구성하는 프로세스입니다.</p>
+
+    <h3 class="sub">계산 예시 — 연체 채권 300,000원을 3개월 분할</h3>
+    <div class="calc-box">
+      총 연체액 = 300,000원<br>
+      분할 회차 = 3회<br>
+      ─────────────────────────<br>
+      회차별 납부액 = 300,000원 ÷ 3회 = <span class="result">100,000원 / 회</span>
+    </div>
+
+    <div class="callout">
+      <span class="tag">기억할 포인트</span>
+      Installment Plan이 수립되면 원래의 단일 채권이 여러 회차의 개별 채권으로 재구성되며, 각 회차는 독립적으로 Dunning 대상이 될 수 있습니다.
+    </div>
+  </section>
+
+  <!-- ===================== 07 RETURN ===================== -->
+  <section id="return">
+    <div class="section-num">07</div>
+    <h2 class="section-title">Return (반환/부도)</h2>
+
+    <p>자동이체 등으로 이미 정상 처리된 것으로 보였던 수납이, 잔액 부족이나 계좌 문제 등의 사유로 <b>사후에 취소(반환)</b>되는 경우를 처리하는 프로세스입니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">자동이체<br>수납 처리</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Clearing<br>(채권 소멸 처리)</div><span class="flow-arrow">→</span>
+      <div class="flow-step wrong-b">Return 발생<br>(부도/잔액부족)</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">채권 재생성<br>(Reopen)</div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">기억할 포인트</span>
+      Return이 발생하면 이미 소멸 처리했던 채권이 다시 살아나는(Reopen) 구조이므로, Return 처리 이전에 이미 진행된 Dunning 이력과의 정합성 관리가 중요한 실무 포인트입니다.
+    </div>
+  </section>
+
+  <!-- ===================== 08 WRITE-OFF ===================== -->
+  <section id="writeoff">
+    <div class="section-num">08</div>
+    <h2 class="section-title">Write-off (대손 처리)</h2>
+
+    <p>Collections 단계를 거쳐도 회수가 불가능하다고 최종 판단된 채권을 장부에서 대손으로 처리하는 프로세스입니다. 이는 IS-U/FI-CA만의 절차가 아니라, 최종적으로 FI(GL)의 대손 회계처리와 연결됩니다.</p>
+
+    <div class="callout warn">
+      <span class="tag">일반화 주의</span>
+      Write-off의 구체적 승인 기준(연체 기간, 금액 한도 등)과 회계처리 방식은 회사의 대손 정책 및 K-IFRS 등 적용 회계기준에 따라 결정되는 영역으로, 이 시리즈에서 특정 기준을 일반화하여 제시하지 않습니다.
+    </div>
+  </section>
+
+  <!-- ===================== 09 GL POSTING ===================== -->
+  <section id="gl">
+    <div class="section-num">09</div>
+    <h2 class="section-title">GL Posting — FI-CA에서 FI로</h2>
+
+    <p>지금까지 다룬 모든 FI-CA 프로세스(청구, 수납, 체납, 분할납부, 대손 등)는 개별 Contract Account 단위로 상세하게 기록되지만, 최종적으로는 요약된 형태로 총계정원장(FI GL)에 반영됩니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">FI-CA<br>(CA 단위 상세)</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">요약/집계</div><span class="flow-arrow">→</span>
+      <div class="flow-step">FI<br>(GL 계정)</div>
+    </div>
+
+    <div class="callout">
+      <span class="tag">Ch.01 재확인</span>
+      "IS-U는 FI-AR을 아예 쓰지 않는다"가 아니라, <b>FI-CA가 FI-AR의 역할을 대신하며 최종적으로 FI에 반영된다</b>는 Ch.01의 원칙이 여기서 완성됩니다. FI-CA는 상세 채권 관리를, FI는 재무제표 수준의 요약을 담당하는 역할 분담 구조입니다.
+    </div>
+  </section>
+
+  <!-- ===================== 10 S4 NOTE ===================== -->
+  <section id="s4">
+    <div class="section-num">10</div>
+    <h2 class="section-title">S/4HANA Utilities Note</h2>
+
+    <div class="s4-note">
+      <span class="badge">S/4HANA NOTE — Ch.05</span>
+      <p style="margin-bottom:0;">FI-CA on S/4HANA에서 자주 언급되는 특징은 Universal Journal을 통한 재무 데이터 통합 관리 강화입니다. FI-CA의 프로세스 자체(Payment Lot, Dunning, Collections 등)는 개념적으로 Classic IS-U와 동일하게 유지되며, 주로 데이터 모델과 리포팅 측면에서의 변화가 언급됩니다. 세부 기능 차이는 프로젝트의 S/4HANA 버전에 따라 달라질 수 있어 별도 확인이 필요합니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 11 CHECK ===================== -->
+  <section id="check">
+    <div class="section-num">11</div>
+    <h2 class="section-title">이해도 점검</h2>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q1. 연체 채권 300,000원을 3개월 분할납부로 재구성할 때, 회차별 납부액은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">300,000원 (전액 1회 납부)</div>
+        <div class="opt" data-correct="true">100,000원</div>
+        <div class="opt" data-correct="false">150,000원</div>
+        <div class="opt" data-correct="false">50,000원</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q2. Dunning에서 유틸리티 산업의 가장 큰 특징은 무엇입니까?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">문서 발송이 전혀 이루어지지 않는다</div>
+        <div class="opt" data-correct="false">Dunning 단계가 항상 1단계로 끝난다</div>
+        <div class="opt" data-correct="true">최종 단계에서 공급 중단(단전/단수)이라는 물리적 조치로 이어질 수 있다</div>
+        <div class="opt" data-correct="false">Dunning은 IS-U에서 사용되지 않는 개념이다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="q">Q3. Return(반환/부도) 프로세스에 대한 설명으로 옳은 것은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">Return이 발생해도 이미 소멸된 채권은 다시 생성되지 않는다</div>
+        <div class="opt" data-correct="true">Return이 발생하면 이미 Clearing 처리됐던 채권이 다시 열린다(Reopen)</div>
+        <div class="opt" data-correct="false">Return은 Payment Lot과 무관한 별도의 독립 프로세스다</div>
+        <div class="opt" data-correct="false">Return은 항상 Write-off로 직결된다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </section>
+
+  <h3 class="sub">Chapter 05 체크리스트</h3>
+  <ul class="checklist">
+    <li><input type="checkbox"> Payment Lot을 통한 수납·Clearing 흐름을 설명할 수 있다</li>
+    <li><input type="checkbox"> Dunning의 단계적 구조와 유틸리티 특화 조치(단전)를 이해했다</li>
+    <li><input type="checkbox"> Collections와 Write-off의 관계(장기 연체 → 최종 대손 판단)를 안다</li>
+    <li><input type="checkbox"> Security Deposit과 Installment Plan의 목적 차이를 설명할 수 있다</li>
+    <li><input type="checkbox"> Return 발생 시 채권이 Reopen된다는 점을 이해했다</li>
+    <li><input type="checkbox"> FI-CA가 상세 관리, FI가 요약 반영을 담당하는 역할 분담 구조를 설명할 수 있다</li>
+  </ul>
+
+  <details class="drill">
+    <summary>Ch.06 예고 — E2E Case Study 미리보기</summary>
+    <div class="drill-body">
+      마지막 챕터에서는 지금까지 배운 모든 개념을 하나의 이야기로 연결합니다. ASPN Energy Korea(K300)의 신규 고객을 대상으로 <b>Business Partner 생성 → Contract Account/Contract 생성 → Connection Object/Premise/Installation 생성 → Device Install → Meter Reading → Billing → Invoicing → Payment → Dunning → Meter Replacement(PM 연계) → Final Bill/Move-out</b>까지, IS-U의 전체 라이프사이클을 순서대로 따라갑니다.
+    </div>
+  </details>
+
+  <div class="footer-nav">
+    <a href="#">← Ch.04 Billing & Invoicing</a>
+    <a href="#">Ch.06 End-to-End Case Study →</a>
+  </div>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('main section');
+  const tabs = document.querySelectorAll('nav.tabs a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if(rect.top <= 100) current = sec.id;
+    });
+    tabs.forEach(t => {
+      t.classList.toggle('active', t.getAttribute('href') === '#' + current);
+    });
+  });
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.opt');
+    const feedback = quiz.querySelector('.feedback');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if(quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        const isCorrect = opt.dataset.correct === 'true';
+        opt.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+        if(!isCorrect){
+          quiz.querySelector('.opt[data-correct="true"]').classList.add('selected-correct');
+        }
+        feedback.textContent = isCorrect ? '정답입니다.' : '오답입니다. 정답이 강조 표시되었습니다.';
+        feedback.classList.add('show', isCorrect ? 'correct' : 'wrong');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

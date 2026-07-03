@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.03 Device Management & Meter Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#003366; --navy-dark:#001f3f; --bg:#f0f3f8; --card-bg:#ffffff;
+    --text:#1c2833; --text-mute:#5b6b7c; --border:#d8e0ea;
+    --warn:#a15c00; --warn-bg:#fff4e0;
+    --correct:#0f6b3c; --correct-bg:#e6f6ee;
+    --wrong:#a4272c; --wrong-bg:#fdeaea;
+    --font-display:'DM Serif Display', 'Noto Sans KR', serif;
+    --font-body:'Noto Sans KR', sans-serif;
+    --font-mono:'JetBrains Mono', 'Noto Sans KR', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{overflow-x:clip; scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:15px; line-height:1.7; word-break:keep-all; overflow-x:clip;}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
+
+  header.hero{background:linear-gradient(135deg, var(--navy-dark), var(--navy)); color:#fff; padding:56px 0 40px;}
+  .eyebrow{font-family:var(--font-mono); font-size:13px; letter-spacing:.12em; color:#9fc1e6; text-transform:uppercase; margin-bottom:14px;}
+  h1{font-family:var(--font-display); font-size:42px; font-weight:400; line-height:1.25; margin-bottom:16px;}
+  .hero-sub{font-size:16px; color:#cfe0f2; max-width:680px;}
+  .hero-meta{margin-top:28px; display:flex; gap:28px; flex-wrap:wrap; font-size:13px; color:#a9c5e2;}
+  .hero-meta b{color:#fff; font-weight:700;}
+
+  nav.tabs{position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(0,51,102,.06);}
+  nav.tabs .wrap{display:flex; gap:2px; overflow-x:auto; padding:0 24px;}
+  nav.tabs a{flex:0 0 auto; font-size:14px; font-weight:700; color:var(--text-mute); padding:16px 14px; text-decoration:none; border-bottom:3px solid transparent; white-space:nowrap; transition:.15s;}
+  nav.tabs a:hover{color:var(--navy);}
+  nav.tabs a.active{color:var(--navy); border-bottom-color:var(--navy);}
+
+  main{padding:48px 0 100px;}
+  section{margin-bottom:64px; scroll-margin-top:64px;}
+  .section-num{font-family:var(--font-mono); font-size:13px; font-weight:600; color:var(--navy); letter-spacing:.06em;}
+  .section-title{font-family:var(--font-display); font-size:30px; font-weight:400; color:var(--navy-dark); margin:8px 0 24px;}
+  h3.sub{font-size:16px; font-weight:700; color:var(--navy-dark); margin:28px 0 12px;}
+  p{margin-bottom:14px; color:var(--text);}
+  ul.plain, ol.plain{margin:0 0 14px 20px;}
+  ul.plain li, ol.plain li{margin-bottom:6px;}
+
+  .card{background:var(--card-bg); border:1px solid var(--border); border-radius:6px; padding:24px 28px; margin-bottom:18px;}
+  .card-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .card-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:720px){.card-grid{grid-template-columns:1fr;} .card-grid.cols-3{grid-template-columns:1fr;}}
+
+  .callout{border-left:4px solid var(--navy); background:#eef3f9; padding:16px 20px; border-radius:0 4px 4px 0; margin:18px 0; font-size:14px;}
+  .callout.warn{border-color:var(--warn); background:var(--warn-bg);}
+  .callout.correct{border-color:var(--correct); background:var(--correct-bg);}
+  .callout.wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .callout .tag{font-family:var(--font-mono); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:6px; color:var(--navy);}
+  .callout.warn .tag{color:var(--warn);}
+  .callout.correct .tag{color:var(--correct);}
+  .callout.wrong .tag{color:var(--wrong);}
+
+  .flow{display:flex; flex-wrap:wrap; align-items:center; gap:0; margin:24px 0;}
+  .flow-step{background:#fff; border:1.5px solid var(--navy); border-radius:6px; padding:10px 14px; font-size:13px; font-weight:700; color:var(--navy-dark); text-align:center; min-width:108px;}
+  .flow-step.hl{background:var(--navy); color:#fff;}
+  .flow-step.mute{border-style:dashed; color:var(--text-mute); border-color:var(--text-mute);}
+  .flow-arrow{font-family:var(--font-mono); color:var(--text-mute); padding:0 8px; font-size:16px;}
+  .flow-wrap-note{font-size:12px; color:var(--text-mute); margin-top:8px; font-family:var(--font-mono);}
+
+  .tree{display:flex; flex-direction:column; align-items:flex-start; gap:0; margin:24px 0;}
+  .tree-node{display:flex; align-items:center; gap:12px; padding:12px 18px; border:1.5px solid var(--navy); border-radius:6px; background:#fff; font-size:14px; font-weight:700; color:var(--navy-dark); margin-bottom:4px;}
+  .tree-node .n-badge{font-family:var(--font-mono); font-size:11px; font-weight:700; color:#fff; background:var(--navy); border-radius:3px; padding:2px 8px; flex:0 0 auto;}
+  .tree-node .n-desc{font-size:12.5px; font-weight:400; color:var(--text-mute);}
+  .tree-indent-1{margin-left:32px;}
+  .tree-indent-2{margin-left:64px;}
+  .tree-connector{width:2px; height:16px; background:var(--border); margin-left:20px;}
+
+  table.cmp{width:100%; border-collapse:collapse; font-size:14px; margin:18px 0;}
+  table.cmp th, table.cmp td{border:1px solid var(--border); padding:12px 14px; text-align:left; vertical-align:top;}
+  table.cmp th{background:var(--navy); color:#fff; font-weight:700; font-size:13px;}
+  table.cmp tr:nth-child(even) td{background:#f7f9fc;}
+  table.cmp td.label{font-weight:700; color:var(--navy-dark); white-space:nowrap;}
+
+  .s4-note{border:1.5px dashed var(--navy); background:#f4f8fc; border-radius:6px; padding:18px 22px; margin:20px 0;}
+  .s4-note .badge{font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.06em; background:var(--navy); color:#fff; padding:3px 10px; border-radius:3px; display:inline-block; margin-bottom:10px;}
+
+  .checklist{list-style:none; margin:0;}
+  .checklist li{display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px;}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{margin-top:3px; width:16px; height:16px; accent-color:var(--navy); flex:0 0 auto;}
+
+  .quiz{background:#fff; border:1px solid var(--border); border-radius:6px; padding:24px 28px;}
+  .quiz .q{font-weight:700; margin-bottom:14px; color:var(--navy-dark);}
+  .quiz .opts{display:flex; flex-direction:column; gap:8px;}
+  .quiz .opt{border:1.5px solid var(--border); border-radius:5px; padding:11px 16px; cursor:pointer; font-size:14px; transition:.12s; background:#fafcfe;}
+  .quiz .opt:hover{border-color:var(--navy);}
+  .quiz .opt.selected-correct{border-color:var(--correct); background:var(--correct-bg); font-weight:700;}
+  .quiz .opt.selected-wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .quiz .feedback{margin-top:14px; font-size:13.5px; padding:12px 16px; border-radius:5px; display:none;}
+  .quiz .feedback.show{display:block;}
+  .quiz .feedback.correct{background:var(--correct-bg); color:var(--correct);}
+  .quiz .feedback.wrong{background:var(--wrong-bg); color:var(--wrong);}
+
+  .drill{border:1px solid var(--border); border-radius:6px; margin:14px 0; overflow:hidden;}
+  .drill summary{padding:14px 20px; cursor:pointer; font-weight:700; color:var(--navy-dark); background:#f7f9fc; list-style:none; display:flex; justify-content:space-between; align-items:center; font-size:14px;}
+  .drill summary::-webkit-details-marker{display:none;}
+  .drill summary::after{content:'+'; font-family:var(--font-mono); font-size:18px; color:var(--navy);}
+  .drill[open] summary::after{content:'–';}
+  .drill .drill-body{padding:18px 20px; font-size:14px; border-top:1px solid var(--border);}
+
+  .footer-nav{display:flex; justify-content:space-between; align-items:center; padding:28px 0; border-top:1px solid var(--border); margin-top:20px;}
+  .footer-nav a{font-size:13px; font-weight:700; color:var(--navy); text-decoration:none; font-family:var(--font-mono);}
+  .footer-nav a:hover{text-decoration:underline;}
+
+  .label-sm{font-family:var(--font-mono); font-size:13px; color:var(--text-mute); letter-spacing:.02em;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">SAP IS-U 시리즈 · Chapter 03 / 06</div>
+    <h1>Device Management &amp; Meter Reading</h1>
+    <p class="hero-sub">계량기와 검침 데이터가 어떻게 수집·관리되는지, AMI·EDM·PM 연계 지점까지 함께 이해합니다.</p>
+    <div class="hero-meta">
+      <span><b>시나리오 법인</b> ASPN Energy Korea (K300)</span>
+      <span><b>이전 챕터</b> Ch.02 Business Master Data</span>
+      <span><b>다음 챕터</b> Billing &amp; Invoicing</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <a href="#intro" class="active">01 도입</a>
+    <a href="#device">02 Device & Register</a>
+    <a href="#reading">03 Meter Reading</a>
+    <a href="#ami">04 AMI 연계</a>
+    <a href="#edm">05 EDM Overview</a>
+    <a href="#pm">06 PM Integration</a>
+    <a href="#s4">07 S/4HANA</a>
+    <a href="#check">08 이해도 점검</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===================== 01 INTRO ===================== -->
+  <section id="intro">
+    <div class="section-num">01</div>
+    <h2 class="section-title">Installation 다음 단계 — "무엇을, 얼마나 썼는가"</h2>
+
+    <p>Ch.02에서 Installation까지의 계층을 다뤘습니다. Installation은 요금(Rate)이 할당되는 논리적 단위였지만, 실제 요금을 계산하려면 <b>얼마나 사용했는지</b>를 알아야 합니다. 이 챕터에서는 그 사용량 데이터가 어디서, 어떻게 만들어지는지를 다룹니다.</p>
+
+    <div class="flow">
+      <div class="flow-step mute">Installation</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">Device / Register</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">Meter Reading</div><span class="flow-arrow">→</span>
+      <div class="flow-step mute">Billing (Ch.04)</div>
+    </div>
+
+    <p>이 챕터는 4개 축으로 구성됩니다.</p>
+    <ul class="plain">
+      <li><b>Device &amp; Register</b> — 계량기 자체의 마스터 데이터 구조</li>
+      <li><b>Meter Reading</b> — 검침값이 시스템에 들어오는 프로세스</li>
+      <li><b>AMI 연계</b> — 원격 검침 인프라(HES/MDMS)와의 관계</li>
+      <li><b>EDM Overview</b> — 대용량 Interval Data가 필요한 이유 (개념 수준)</li>
+      <li><b>PM Integration</b> — 계량기 교체·점검 시 설비관리와 만나는 지점</li>
+    </ul>
+  </section>
+
+  <!-- ===================== 02 DEVICE & REGISTER ===================== -->
+  <section id="device">
+    <div class="section-num">02</div>
+    <h2 class="section-title">Device &amp; Register</h2>
+
+    <p>Device는 Installation에 설치되는 물리적 계량기입니다. 하나의 Device는 하나 이상의 <b>Register</b>(계량 항목)를 가질 수 있습니다.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3 class="sub" style="margin-top:0;">Device</h3>
+        <p style="margin-bottom:0; font-size:13.5px;">물리적 계량기 자체. 일련번호, 제조사, 설치일 등 기술 속성을 가지며 Installation에 설치(Install)되는 시점과 탈거(Remove)되는 시점이 이력으로 관리됩니다.</p>
+      </div>
+      <div class="card">
+        <h3 class="sub" style="margin-top:0;">Register</h3>
+        <p style="margin-bottom:0; font-size:13.5px;">Device 내에서 실제로 값을 읽어내는 계량 항목. 예: 시간대별 요금제(계시별)를 쓰는 전력 계량기는 최대부하/일반/경부하 등 <b>여러 Register를 하나의 Device 안에</b> 가질 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">일반화 주의</span>
+      "Device 1개 = Register 1개"로 단순화하지 않습니다. 계시별 요금(시간대별 차등요금)을 적용받는 산업용 고객의 경우 하나의 계량기 안에 여러 Register가 존재하는 것이 일반적입니다.
+    </div>
+  </section>
+
+  <!-- ===================== 03 METER READING ===================== -->
+  <section id="reading">
+    <div class="section-num">03</div>
+    <h2 class="section-title">Meter Reading (검침)</h2>
+
+    <p>검침은 Register로부터 실제 사용량 값을 수집하는 프로세스입니다. 검침 지시(Meter Reading Order)가 생성되고, 그 결과로 검침 결과(Meter Reading Result)가 시스템에 입력됩니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">Meter Reading<br>Order 생성</div><span class="flow-arrow">→</span>
+      <div class="flow-step">검침 실행<br>(수동/AMI)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Meter Reading<br>Result 입력</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">Billing 트리거</div>
+    </div>
+
+    <table class="cmp">
+      <tr><th style="width:22%;">방식</th><th>설명</th></tr>
+      <tr><td class="label">수동 검침</td><td>검침원이 현장 방문 또는 고객 자가 신고로 값을 입력. 검침 주기가 길거나 AMI 미보급 지역에서 사용</td></tr>
+      <tr><td class="label">AMI(원격 검침)</td><td>계량기가 통신망을 통해 자동으로 값을 전송. 검침 빈도와 정확도가 크게 향상되며, 상세 사용 패턴(Interval Data) 확보 가능</td></tr>
+    </table>
+
+    <div class="callout">
+      <span class="tag">기억할 포인트</span>
+      검침 결과는 그 자체로 청구서가 되지 않습니다. 이 값은 Ch.04의 <b>Billing</b> 단계로 넘어가 요금 구조(Rate)와 결합되어야 비로소 금액이 산출됩니다.
+    </div>
+  </section>
+
+  <!-- ===================== 04 AMI ===================== -->
+  <section id="ami">
+    <div class="section-num">04</div>
+    <h2 class="section-title">AMI 연계 — HES / MDMS 흐름</h2>
+
+    <p>대형 공기업은 대부분 AMI(Advanced Metering Infrastructure) 기반 원격 검침을 확대하고 있습니다. IS-U는 이 인프라와 직접 통신하지 않고, 중간 시스템을 통해 검침 데이터를 전달받는 구조가 일반적입니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">스마트<br>계량기</div><span class="flow-arrow">→</span>
+      <div class="flow-step">HES<br>(Head-End System)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">MDMS<br>(Meter Data Mgmt)</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">IS-U<br>Meter Reading</div>
+    </div>
+
+    <table class="cmp">
+      <tr><th style="width:20%;">구성요소</th><th>역할</th></tr>
+      <tr><td class="label">HES</td><td>필드의 스마트 계량기와 직접 통신하며 원시 데이터를 수집</td></tr>
+      <tr><td class="label">MDMS</td><td>수집된 대용량 검침 데이터를 검증·정제(VEE: Validation, Estimation, Editing)하고 활용 가능한 형태로 관리</td></tr>
+      <tr><td class="label">IS-U</td><td>MDMS로부터 정제된 검침 결과를 전달받아 Billing에 활용</td></tr>
+    </table>
+
+    <div class="callout warn">
+      <span class="tag">범위 확인 필요</span>
+      HES-MDMS-IS-U 간의 정확한 인터페이스 방식(연계 주기, 데이터 포맷, 실시간 여부)은 프로젝트마다 다르게 설계됩니다. 이 챕터는 개념적 흐름만 소개하며, VEE의 상세 로직은 EDM Advanced 과정에서 다룹니다.
+    </div>
+  </section>
+
+  <!-- ===================== 05 EDM OVERVIEW ===================== -->
+  <section id="edm">
+    <div class="section-num">05</div>
+    <h2 class="section-title">EDM Overview (Interval Data 개념)</h2>
+
+    <p>AMI가 확대되면 계량기가 하루에도 수십~수백 회씩 값을 전송합니다. 이렇게 짧은 주기로 수집되는 대용량 데이터를 <b>Interval Data</b>라고 하며, 이를 전문적으로 관리하는 영역이 <b>EDM(Energy Data Management)</b>입니다.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3 class="sub" style="margin-top:0;">왜 EDM이 필요한가</h3>
+        <ul class="plain" style="margin-bottom:0;">
+          <li>월 1회 수준의 일반 검침과 달리, 15분/1시간 단위의 대용량 데이터 처리 필요</li>
+          <li>계시별 요금, 수요관리(Demand Response) 등 정교한 요금 설계의 기반 데이터</li>
+          <li>일반 Meter Reading 구조만으로는 이 볼륨과 활용 목적을 감당하기 어려움</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="sub" style="margin-top:0;">이 챕터에서 다루는 범위</h3>
+        <ul class="plain" style="margin-bottom:0;">
+          <li>Interval Data의 개념</li>
+          <li>AMI → HES → MDMS → EDM → Billing 흐름</li>
+          <li>EDM이 왜 별도 영역으로 분리되는지</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="tag">심화 과정 안내</span>
+      Interval Profile, Profile Values, VEE(Validation·Estimation·Editing), Profile Allocation, Settlement, 시장/정산 연계 등 EDM의 상세 내용은 <b>EDM Advanced 과정</b>(별도 모듈)에서 다룹니다. 이 챕터에서는 "왜 필요한가"까지만 이해하면 충분합니다.
+    </div>
+  </section>
+
+  <!-- ===================== 06 PM INTEGRATION ===================== -->
+  <section id="pm">
+    <div class="section-num">06</div>
+    <h2 class="section-title">PM Integration (설비관리 연계)</h2>
+
+    <p>계량기 교체, 정기 점검, 고장 수리 등은 IS-U만의 프로세스가 아니라 <b>PM(Plant Maintenance)</b> 모듈과 만나는 지점입니다. 대형 공기업 프로젝트에서는 배전설비 점검처럼 IS-U 범위를 벗어나는 설비관리 프로세스가 함께 설계되는 경우가 많습니다.</p>
+
+    <h3 class="sub">전형적인 연계 흐름 (계량기 교체 예시)</h3>
+    <div class="flow">
+      <div class="flow-step">이상 감지 /<br>점검 주기 도래</div><span class="flow-arrow">→</span>
+      <div class="flow-step">PM<br>Notification</div><span class="flow-arrow">→</span>
+      <div class="flow-step">PM<br>Work Order</div><span class="flow-arrow">→</span>
+      <div class="flow-step hl">계량기 교체<br>(IS-U Device 이력 갱신)</div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">검증 필요 — 일반화 주의</span>
+      IS-U의 Connection Object가 PM의 Functional Location과 <b>항상 1:1로 직접 매핑되는 표준 구조</b>라고 단정할 수 없습니다. IS-U의 Business/Technical Master Data와 PM의 Technical Object(Functional Location, Equipment)를 연계하는 것은 대표적인 통합 패턴 중 하나이며, 실제 매핑 방식과 연계 범위는 <b>프로젝트별 설계 결정 사항</b>입니다. 교육에서는 "대표적인 통합 패턴"과 "프로젝트별 설계 차이"를 함께 설명하는 것이 안전합니다.
+    </div>
+
+    <p class="label-sm">※ PM 자체의 상세 구조(Functional Location 계층, Work Order 프로세스 등)는 이 시리즈의 범위를 벗어나며, 여기서는 IS-U와 만나는 지점만 개념적으로 다룹니다.</p>
+  </section>
+
+  <!-- ===================== 07 S4 NOTE ===================== -->
+  <section id="s4">
+    <div class="section-num">07</div>
+    <h2 class="section-title">S/4HANA Utilities Note</h2>
+
+    <div class="s4-note">
+      <span class="badge">S/4HANA NOTE — Ch.03</span>
+      <p style="margin-bottom:0;">AMI·EDM 영역은 S/4HANA 전환 시 아키텍처 변화가 큰 영역 중 하나로 자주 언급됩니다. 다만 구체적인 변화 폭은 채택하는 EDM 솔루션과 프로젝트 범위에 따라 달라지므로, 이 시리즈에서는 "AMI/EDM 연계가 프로젝트마다 상이하게 설계될 수 있다"는 점을 원칙으로 안내하며, 세부 아키텍처 비교는 본 개론 시리즈의 범위를 벗어납니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 08 CHECK ===================== -->
+  <section id="check">
+    <div class="section-num">08</div>
+    <h2 class="section-title">이해도 점검</h2>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q1. Device와 Register의 관계를 가장 정확히 설명한 것은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">하나의 Device는 항상 하나의 Register만 가진다</div>
+        <div class="opt" data-correct="true">하나의 Device는 계시별 요금 등의 이유로 여러 Register를 가질 수 있다</div>
+        <div class="opt" data-correct="false">Register가 Device를 포함하는 상위 개념이다</div>
+        <div class="opt" data-correct="false">Device와 Register는 동일한 객체를 부르는 다른 이름이다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q2. AMI 검침 데이터가 IS-U에 도달하기까지의 일반적인 흐름은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">스마트 계량기 → IS-U → HES → MDMS</div>
+        <div class="opt" data-correct="true">스마트 계량기 → HES → MDMS → IS-U</div>
+        <div class="opt" data-correct="false">MDMS → HES → 스마트 계량기 → IS-U</div>
+        <div class="opt" data-correct="false">스마트 계량기 → MDMS → IS-U → HES</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="q">Q3. IS-U와 PM의 연계에 대한 설명으로 가장 정확한 것은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">Connection Object와 PM Functional Location은 항상 표준적으로 1:1 매핑된다</div>
+        <div class="opt" data-correct="true">IS-U와 PM의 연계 패턴은 대표적인 통합 방식이 있지만, 실제 매핑과 범위는 프로젝트별 설계에 따라 달라질 수 있다</div>
+        <div class="opt" data-correct="false">IS-U는 PM과 어떠한 경우에도 연계되지 않는다</div>
+        <div class="opt" data-correct="false">PM Work Order는 항상 Meter Reading Order를 통해서만 생성된다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </section>
+
+  <h3 class="sub">Chapter 03 체크리스트</h3>
+  <ul class="checklist">
+    <li><input type="checkbox"> Device와 Register의 관계와 계시별 요금과의 연관성을 설명할 수 있다</li>
+    <li><input type="checkbox"> Meter Reading Order → 검침 → Result → Billing 트리거 흐름을 말할 수 있다</li>
+    <li><input type="checkbox"> AMI(스마트 계량기-HES-MDMS-IS-U) 흐름을 순서대로 설명할 수 있다</li>
+    <li><input type="checkbox"> EDM이 왜 필요한지, 이 챕터와 EDM Advanced 과정의 범위 차이를 안다</li>
+    <li><input type="checkbox"> IS-U-PM 연계가 표준 1:1 매핑이 아니라 프로젝트별 설계 영역임을 이해했다</li>
+  </ul>
+
+  <details class="drill">
+    <summary>Ch.04 예고 — Billing & Invoicing 미리보기</summary>
+    <div class="drill-body">
+      다음 챕터에서는 이 챕터에서 수집한 검침 결과가 Rate Category/Type/Structure와 결합되어 실제 금액으로 계산되는 <b>Billing</b> 과정과, 그 결과가 청구서로 문서화되는 <b>Invoicing</b> 과정을 3단계(Meter Reading → Billing → Invoicing → FI-CA)로 나누어 다룹니다. 누진요금, 계절별 요금, Proration, Move-in/out, Backbilling까지 포함합니다.
+    </div>
+  </details>
+
+  <div class="footer-nav">
+    <a href="#">← Ch.02 Business Master Data</a>
+    <a href="#">Ch.04 Billing & Invoicing →</a>
+  </div>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('main section');
+  const tabs = document.querySelectorAll('nav.tabs a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if(rect.top <= 100) current = sec.id;
+    });
+    tabs.forEach(t => {
+      t.classList.toggle('active', t.getAttribute('href') === '#' + current);
+    });
+  });
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.opt');
+    const feedback = quiz.querySelector('.feedback');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if(quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        const isCorrect = opt.dataset.correct === 'true';
+        opt.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+        if(!isCorrect){
+          quiz.querySelector('.opt[data-correct="true"]').classList.add('selected-correct');
+        }
+        feedback.textContent = isCorrect ? '정답입니다.' : '오답입니다. 정답이 강조 표시되었습니다.';
+        feedback.classList.add('show', isCorrect ? 'correct' : 'wrong');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

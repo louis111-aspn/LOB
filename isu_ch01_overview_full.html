@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.01 IS-U Overview & E2E Business Process</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#003366;
+    --navy-dark:#001f3f;
+    --bg:#f0f3f8;
+    --card-bg:#ffffff;
+    --text:#1c2833;
+    --text-mute:#5b6b7c;
+    --border:#d8e0ea;
+    --warn:#a15c00;
+    --warn-bg:#fff4e0;
+    --correct:#0f6b3c;
+    --correct-bg:#e6f6ee;
+    --wrong:#a4272c;
+    --wrong-bg:#fdeaea;
+    --font-display:'DM Serif Display', 'Noto Sans KR', serif;
+    --font-body:'Noto Sans KR', sans-serif;
+    --font-mono:'JetBrains Mono', 'Noto Sans KR', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{overflow-x:clip; scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.7;
+    word-break:keep-all;
+    overflow-x:clip;
+  }
+  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
+
+  /* ===== HEADER ===== */
+  header.hero{
+    background:linear-gradient(135deg, var(--navy-dark), var(--navy));
+    color:#fff;
+    padding:56px 0 40px;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:13px;
+    letter-spacing:.12em;
+    color:#9fc1e6;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-size:42px;
+    font-weight:400;
+    line-height:1.25;
+    margin-bottom:16px;
+  }
+  .hero-sub{
+    font-size:16px;
+    color:#cfe0f2;
+    max-width:680px;
+  }
+  .hero-meta{
+    margin-top:28px;
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    font-size:13px;
+    color:#a9c5e2;
+  }
+  .hero-meta b{color:#fff; font-weight:700;}
+
+  /* ===== STICKY NAV ===== */
+  nav.tabs{
+    position:sticky; top:0; z-index:50;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    box-shadow:0 2px 8px rgba(0,51,102,.06);
+  }
+  nav.tabs .wrap{display:flex; gap:2px; overflow-x:auto; padding:0 24px;}
+  nav.tabs a{
+    flex:0 0 auto;
+    font-size:14px;
+    font-weight:700;
+    color:var(--text-mute);
+    padding:16px 14px;
+    text-decoration:none;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+    transition:.15s;
+  }
+  nav.tabs a:hover{color:var(--navy);}
+  nav.tabs a.active{color:var(--navy); border-bottom-color:var(--navy);}
+
+  /* ===== SECTIONS ===== */
+  main{padding:48px 0 100px;}
+  section{margin-bottom:64px; scroll-margin-top:64px;}
+  .section-num{
+    font-family:var(--font-mono);
+    font-size:13px;
+    font-weight:600;
+    color:var(--navy);
+    letter-spacing:.06em;
+  }
+  .section-title{
+    font-family:var(--font-display);
+    font-size:30px;
+    font-weight:400;
+    color:var(--navy-dark);
+    margin:8px 0 24px;
+  }
+  h3.sub{font-size:16px; font-weight:700; color:var(--navy-dark); margin:28px 0 12px;}
+  p{margin-bottom:14px; color:var(--text);}
+  ul.plain, ol.plain{margin:0 0 14px 20px;}
+  ul.plain li, ol.plain li{margin-bottom:6px;}
+
+  /* ===== CARD ===== */
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:24px 28px;
+    margin-bottom:18px;
+  }
+  .card-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:720px){.card-grid{grid-template-columns:1fr;}}
+
+  /* ===== CALLOUT ===== */
+  .callout{
+    border-left:4px solid var(--navy);
+    background:#eef3f9;
+    padding:16px 20px;
+    border-radius:0 4px 4px 0;
+    margin:18px 0;
+    font-size:14px;
+  }
+  .callout.warn{border-color:var(--warn); background:var(--warn-bg);}
+  .callout.correct{border-color:var(--correct); background:var(--correct-bg);}
+  .callout.wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .callout .tag{
+    font-family:var(--font-mono);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:6px;
+    color:var(--navy);
+  }
+  .callout.warn .tag{color:var(--warn);}
+  .callout.correct .tag{color:var(--correct);}
+  .callout.wrong .tag{color:var(--wrong);}
+
+  /* ===== FLOW DIAGRAM ===== */
+  .flow{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:0;
+    margin:24px 0;
+  }
+  .flow-step{
+    background:#fff;
+    border:1.5px solid var(--navy);
+    border-radius:6px;
+    padding:10px 14px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy-dark);
+    text-align:center;
+    min-width:108px;
+  }
+  .flow-step.fica{background:var(--navy); color:#fff;}
+  .flow-arrow{
+    font-family:var(--font-mono);
+    color:var(--text-mute);
+    padding:0 8px;
+    font-size:16px;
+  }
+  .flow-wrap-note{
+    font-size:12px; color:var(--text-mute); margin-top:8px; font-family:var(--font-mono);
+  }
+
+  /* ===== TABLE ===== */
+  table.cmp{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+    margin:18px 0;
+  }
+  table.cmp th, table.cmp td{
+    border:1px solid var(--border);
+    padding:12px 14px;
+    text-align:left;
+    vertical-align:top;
+  }
+  table.cmp th{
+    background:var(--navy);
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+  }
+  table.cmp tr:nth-child(even) td{background:#f7f9fc;}
+  table.cmp td.label{font-weight:700; color:var(--navy-dark); white-space:nowrap;}
+
+  /* ===== S/4HANA NOTE ===== */
+  .s4-note{
+    border:1.5px dashed var(--navy);
+    background:#f4f8fc;
+    border-radius:6px;
+    padding:18px 22px;
+    margin:20px 0;
+    position:relative;
+  }
+  .s4-note .badge{
+    font-family:var(--font-mono);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    background:var(--navy);
+    color:#fff;
+    padding:3px 10px;
+    border-radius:3px;
+    display:inline-block;
+    margin-bottom:10px;
+  }
+
+  /* ===== CHECKLIST ===== */
+  .checklist{list-style:none; margin:0;}
+  .checklist li{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+  }
+  .checklist li:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{
+    margin-top:3px; width:16px; height:16px; accent-color:var(--navy); flex:0 0 auto;
+  }
+
+  /* ===== QUIZ ===== */
+  .quiz{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:24px 28px;
+  }
+  .quiz .q{font-weight:700; margin-bottom:14px; color:var(--navy-dark);}
+  .quiz .opts{display:flex; flex-direction:column; gap:8px;}
+  .quiz .opt{
+    border:1.5px solid var(--border);
+    border-radius:5px;
+    padding:11px 16px;
+    cursor:pointer;
+    font-size:14px;
+    transition:.12s;
+    background:#fafcfe;
+  }
+  .quiz .opt:hover{border-color:var(--navy);}
+  .quiz .opt.selected-correct{border-color:var(--correct); background:var(--correct-bg); font-weight:700;}
+  .quiz .opt.selected-wrong{border-color:var(--wrong); background:var(--wrong-bg);}
+  .quiz .feedback{
+    margin-top:14px; font-size:13.5px; padding:12px 16px; border-radius:5px; display:none;
+  }
+  .quiz .feedback.show{display:block;}
+  .quiz .feedback.correct{background:var(--correct-bg); color:var(--correct);}
+  .quiz .feedback.wrong{background:var(--wrong-bg); color:var(--wrong);}
+
+  /* ===== DRILL TOGGLE ===== */
+  .drill{
+    border:1px solid var(--border);
+    border-radius:6px;
+    margin:14px 0;
+    overflow:hidden;
+  }
+  .drill summary{
+    padding:14px 20px;
+    cursor:pointer;
+    font-weight:700;
+    color:var(--navy-dark);
+    background:#f7f9fc;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:14px;
+  }
+  .drill summary::-webkit-details-marker{display:none;}
+  .drill summary::after{content:'+'; font-family:var(--font-mono); font-size:18px; color:var(--navy);}
+  .drill[open] summary::after{content:'–';}
+  .drill .drill-body{padding:18px 20px; font-size:14px; border-top:1px solid var(--border);}
+
+  /* ===== FOOTER NAV ===== */
+  .footer-nav{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:28px 0; border-top:1px solid var(--border); margin-top:20px;
+  }
+  .footer-nav a{
+    font-size:13px; font-weight:700; color:var(--navy);
+    text-decoration:none; font-family:var(--font-mono);
+  }
+  .footer-nav a:hover{text-decoration:underline;}
+
+  .label-sm{
+    font-family:var(--font-mono); font-size:13px; color:var(--text-mute); letter-spacing:.02em;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">SAP IS-U 시리즈 · Chapter 01 / 06</div>
+    <h1>IS-U Overview &amp; End-to-End Business Process</h1>
+    <p class="hero-sub">에너지·유틸리티 대형 공기업 프로젝트를 위한 SAP IS-U 입문. FI-CA 기반 아키텍처와 신규 가입부터 청구·수납까지의 전체 흐름을 조감도로 이해합니다.</p>
+    <div class="hero-meta">
+      <span><b>시나리오 법인</b> ASPN Energy Korea (K300)</span>
+      <span><b>선수 지식</b> 없음 (시리즈 출발점)</span>
+      <span><b>다음 챕터</b> Business Master Data</span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <a href="#intro" class="active">01 도입</a>
+    <a href="#architecture">02 아키텍처</a>
+    <a href="#flow">03 E2E 흐름</a>
+    <a href="#comparison">04 vs SD/FI</a>
+    <a href="#s4">05 S/4HANA</a>
+    <a href="#check">06 이해도 점검</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===================== 01 INTRO ===================== -->
+  <section id="intro">
+    <div class="section-num">01</div>
+    <h2 class="section-title">왜 IS-U는 다르게 접근해야 하는가</h2>
+
+    <p>ASPN Energy Korea(K300)는 전력·가스를 판매하는 대형 공기업으로, 수백만 건의 계량 포인트와 매월 반복되는 대량 청구를 처리해야 합니다. 일반 제조·유통 기업의 SD/FI 구조로는 이 볼륨과 반복성을 감당하기 어렵기 때문에, SAP는 유틸리티 산업 전용 솔루션인 <b>IS-U(Industry Solution for Utilities)</b>를 별도로 설계했습니다.</p>
+
+    <div class="callout">
+      <span class="tag">핵심 관점</span>
+      IS-U를 SD/FI의 '변형'으로 이해하면 이후 챕터가 어려워집니다. IS-U는 검침(Metering) → 요금계산(Billing) → 청구(Invoicing) → 대량 채권관리(FI-CA)라는 <b>산업 고유 프로세스를 중심으로 설계된 별도 솔루션</b>이라는 관점에서 출발해야 합니다.
+    </div>
+
+    <h3 class="sub">이 챕터에서 다루는 것</h3>
+    <ul class="plain">
+      <li>IS-U의 재무 백본인 FI-CA가 왜 필요한지</li>
+      <li>Business Partner부터 FI Posting까지 이어지는 전체 프로세스 조감도</li>
+      <li>IS-U와 일반 SD/FI 구조의 구조적 차이</li>
+      <li>S/4HANA Utilities로의 전환이 갖는 의미 (개요 수준)</li>
+    </ul>
+    <p class="label-sm">※ 개별 객체(Connection Object, Premise, Installation 등)의 상세 구조는 Ch.02에서, 요금·청구 로직은 Ch.04에서 다룹니다. 이 챕터는 전체 그림을 잡는 것이 목표입니다.</p>
+  </section>
+
+  <!-- ===================== 02 ARCHITECTURE ===================== -->
+  <section id="architecture">
+    <div class="section-num">02</div>
+    <h2 class="section-title">FI-CA 기반 아키텍처</h2>
+
+    <p>IS-U의 재무 처리는 일반 FI-AR(Accounts Receivable)이 아니라 <b>FI-CA(Contract Accounts Receivable and Payable)</b>라는 별도의 서브렌저 위에서 이루어집니다. FI-CA는 유틸리티처럼 한 고객에게 매월 반복적으로 소액·다건의 청구가 발생하는 업종을 위해 설계된 컴포넌트입니다.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3 class="sub" style="margin-top:0;">FI-CA가 필요한 이유</h3>
+        <ul class="plain">
+          <li>고객 1인당 연 12회 이상의 반복 청구 발생</li>
+          <li>계약 단위(Contract Account)로 다건의 채권을 통합 관리</li>
+          <li>분할납부, 체납, 단전(Dunning) 등 유틸리티 특화 채권 프로세스 지원</li>
+          <li>대량 배치 처리(Mass Run)에 최적화된 구조</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="sub" style="margin-top:0;">IS-U의 3대 축</h3>
+        <ul class="plain">
+          <li><b>Master Data</b> — 고객·계약·설비 정보 (Business + Technical)</li>
+          <li><b>Billing / Invoicing Engine</b> — 검침값을 요금으로 환산, 청구서 생성</li>
+          <li><b>FI-CA</b> — 채권 관리 및 GL(FI)로의 재무 통합</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">주의</span>
+      FI-CA는 IS-U 전용 컴포넌트가 아니라, 통신·보험·공공 등 대량 반복 청구가 발생하는 여러 산업솔루션(FI-CA 기반 산업솔루션군)에서 공유하는 컴포넌트입니다. "IS-U만의 고유 모듈"이라고 일반화하지 않도록 주의합니다.
+    </div>
+  </section>
+
+  <!-- ===================== 03 E2E FLOW ===================== -->
+  <section id="flow">
+    <div class="section-num">03</div>
+    <h2 class="section-title">End-to-End 프로세스 조감도</h2>
+
+    <p>아래는 ASPN Energy Korea(K300)에서 신규 고객이 전력 공급을 신청한 시점부터 재무제표(FI)에 반영되기까지의 전체 흐름입니다. 각 객체와 단계의 상세 내용은 이후 챕터에서 순서대로 다룹니다.</p>
+
+    <div class="flow">
+      <div class="flow-step">Business<br>Partner</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Contract<br>Account</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Contract</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Connection<br>Object</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Premise</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Installation</div>
+    </div>
+    <div class="flow">
+      <div class="flow-step">Device /<br>Register</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Meter<br>Reading</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Billing</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Invoicing</div><span class="flow-arrow">→</span>
+      <div class="flow-step fica">FI-CA<br>Posting</div><span class="flow-arrow">→</span>
+      <div class="flow-step">FI (GL)</div>
+    </div>
+    <p class="flow-wrap-note">※ 좌→우, 위 줄 완료 후 아래 줄로 이어지는 하나의 연속된 흐름입니다.</p>
+
+    <h3 class="sub">단계별 한 줄 요약</h3>
+    <table class="cmp">
+      <tr><th style="width:22%;">단계</th><th>내용</th></tr>
+      <tr><td class="label">Business Partner</td><td>고객(개인/법인)의 마스터 데이터. IS-U 전 프로세스의 출발점</td></tr>
+      <tr><td class="label">Contract Account</td><td>채권·청구를 묶는 재무 단위. FI-CA의 핵심 관리 대상</td></tr>
+      <tr><td class="label">Contract</td><td>공급 계약 자체 (예: 전력 공급 계약)</td></tr>
+      <tr><td class="label">Connection Object / Premise / Installation</td><td>공급 지점의 물리적·기술적 계층 구조 (Ch.02 상세)</td></tr>
+      <tr><td class="label">Device / Register</td><td>계량기와 계량 항목(Register)</td></tr>
+      <tr><td class="label">Meter Reading</td><td>실제 검침값 수집 (수동 검침 또는 AMI)</td></tr>
+      <tr><td class="label">Billing</td><td>검침값을 요금 구조(Rate)에 따라 사용량·금액으로 환산</td></tr>
+      <tr><td class="label">Invoicing</td><td>Billing 결과를 실제 청구서(Invoice) 문서로 생성</td></tr>
+      <tr><td class="label">FI-CA Posting</td><td>청구액을 채권으로 전기(Post), 이후 수납·체납 관리</td></tr>
+      <tr><td class="label">FI (GL)</td><td>FI-CA 데이터가 총계정원장에 요약 반영</td></tr>
+    </table>
+
+    <div class="callout correct">
+      <span class="tag">기억할 포인트</span>
+      Billing과 Invoicing은 같은 개념이 아닙니다. <b>Billing은 "계산"</b>(사용량 × 요율 = 금액), <b>Invoicing은 "문서화"</b>(청구서 생성)입니다. 이 둘을 분리해서 이해해야 Ch.04가 명확해집니다.
+    </div>
+  </section>
+
+  <!-- ===================== 04 COMPARISON ===================== -->
+  <section id="comparison">
+    <div class="section-num">04</div>
+    <h2 class="section-title">IS-U vs 일반 SD/FI 구조 비교</h2>
+
+    <p>동일한 "판매 → 청구 → 수금" 흐름이라도, IS-U는 볼륨과 반복성 때문에 일반 SD/FI 기업과 구조적으로 다른 선택을 합니다.</p>
+
+    <table class="cmp">
+      <tr><th style="width:22%;">구분</th><th>일반 SD/FI 기업</th><th>IS-U (유틸리티)</th></tr>
+      <tr>
+        <td class="label">채권 관리</td>
+        <td>FI-AR (Customer Master + FI 문서)</td>
+        <td>FI-CA (Contract Account 단위 서브렌저)</td>
+      </tr>
+      <tr>
+        <td class="label">청구 트리거</td>
+        <td>영업 주문(Sales Order) 기반, 건별 발생</td>
+        <td>주기적 Meter Reading 기반, 대량 배치(Mass Run)로 발생</td>
+      </tr>
+      <tr>
+        <td class="label">마스터 데이터 성격</td>
+        <td>고객-자재 중심</td>
+        <td>고객-계약-물리적 공급지점(Connection Object~Installation) 중심</td>
+      </tr>
+      <tr>
+        <td class="label">가격/요금 결정</td>
+        <td>가격 조건(Pricing Condition) 중심</td>
+        <td>규제 요금 구조(Rate Category/Type/Structure) 중심 — 정부 고시요금 반영</td>
+      </tr>
+      <tr>
+        <td class="label">특화 프로세스</td>
+        <td>일반 매출채권 회수, 표준 Dunning</td>
+        <td>Move-in/Move-out, Backbilling, 유틸리티 특화 Dunning·단전 프로세스</td>
+      </tr>
+    </table>
+
+    <div class="callout warn">
+      <span class="tag">일반화 주의</span>
+      "IS-U는 FI-AR을 아예 쓰지 않는다"는 표현은 부정확합니다. FI-CA는 FI-AR을 대체하는 별도 서브렌저이지만, 총계정원장(GL) 수준에서는 결국 FI로 통합됩니다. "FI-CA가 FI-AR의 역할을 대신하며, 최종적으로 FI에 반영된다"는 표현이 정확합니다.
+    </div>
+  </section>
+
+  <!-- ===================== 05 S/4HANA NOTE ===================== -->
+  <section id="s4">
+    <div class="section-num">05</div>
+    <h2 class="section-title">S/4HANA Utilities 개요</h2>
+
+    <p>최근 대형 공기업 프로젝트는 Classic IS-U가 아닌 <b>S/4HANA Utilities</b> 기반으로 진행되는 경우가 늘고 있습니다. 이 챕터에서는 개념 수준만 소개하며, 영역별 구체적 변화는 각 해당 챕터의 S/4HANA Note에서 다룹니다.</p>
+
+    <div class="s4-note">
+      <span class="badge">S/4HANA NOTE — Ch.01</span>
+      <p style="margin-bottom:8px;">S/4HANA Utilities는 Classic IS-U의 비즈니스 프로세스(BP-CA-Contract-CO-Premise-Installation 구조, Billing/Invoicing/FI-CA 흐름)를 계승하되, 다음 영역에서 변화가 있습니다.</p>
+      <ul class="plain" style="margin-bottom:0;">
+        <li>UI: Fiori 기반 화면으로 전환</li>
+        <li>데이터 모델: Universal Journal을 통한 재무 데이터 통합 관리 강화</li>
+        <li>세부 변화 지점은 이후 챕터에서 개별적으로 확인: <b>AMI/EDM(Ch.03)</b>, <b>Billing Engine(Ch.04)</b>, <b>FI-CA on S/4HANA(Ch.05)</b></li>
+      </ul>
+    </div>
+
+    <p class="label-sm">※ Classic IS-U 대비 정확한 기능적 차이는 프로젝트의 S/4HANA 버전 및 구현 범위에 따라 달라질 수 있어, 본 시리즈에서는 "대표적인 변화 방향"을 소개하는 수준으로 다룹니다.</p>
+  </section>
+
+  <!-- ===================== 06 CHECK ===================== -->
+  <section id="check">
+    <div class="section-num">06</div>
+    <h2 class="section-title">이해도 점검</h2>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q1. IS-U의 재무 백본으로 사용되는 컴포넌트는 무엇입니까?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">FI-AR (Accounts Receivable)</div>
+        <div class="opt" data-correct="true">FI-CA (Contract Accounts Receivable and Payable)</div>
+        <div class="opt" data-correct="false">CO-PA (Profitability Analysis)</div>
+        <div class="opt" data-correct="false">SD Billing (VF01)</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz" style="margin-bottom:24px;">
+      <div class="q">Q2. Billing과 Invoicing의 관계를 가장 정확히 설명한 것은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">둘은 동일한 개념이며 IS-U에서 혼용해서 사용한다</div>
+        <div class="opt" data-correct="true">Billing은 사용량을 금액으로 계산하는 단계이고, Invoicing은 그 결과를 청구서 문서로 생성하는 단계다</div>
+        <div class="opt" data-correct="false">Invoicing이 먼저 발생하고, 그 결과를 바탕으로 Billing이 계산된다</div>
+        <div class="opt" data-correct="false">Billing은 FI-CA의 하위 기능이고 Invoicing은 별도 모듈이다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="q">Q3. 다음 중 IS-U와 일반 SD/FI 기업의 구조적 차이로 옳지 않은 것은?</div>
+      <div class="opts">
+        <div class="opt" data-correct="false">IS-U는 규제 요금 구조(Rate Category/Type/Structure)를 중심으로 가격을 결정한다</div>
+        <div class="opt" data-correct="false">IS-U는 Meter Reading을 트리거로 대량 배치 청구가 발생한다</div>
+        <div class="opt" data-correct="true">IS-U는 FI-CA만 사용하며 총계정원장(FI)과는 연동되지 않는다</div>
+        <div class="opt" data-correct="false">IS-U는 Move-in/Move-out과 같은 유틸리티 특화 프로세스를 갖는다</div>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </section>
+
+  <h3 class="sub">Chapter 01 체크리스트</h3>
+  <ul class="checklist">
+    <li><input type="checkbox"> FI-CA가 왜 필요한지, FI-AR과 어떻게 다른지 설명할 수 있다</li>
+    <li><input type="checkbox"> BP → CA → Contract → CO → Premise → Installation → Device → Meter Reading → Billing → Invoicing → FI-CA → FI 흐름을 순서대로 말할 수 있다</li>
+    <li><input type="checkbox"> Billing과 Invoicing의 차이를 명확히 구분할 수 있다</li>
+    <li><input type="checkbox"> IS-U와 일반 SD/FI 기업의 구조적 차이 3가지 이상을 설명할 수 있다</li>
+  </ul>
+
+  <details class="drill">
+    <summary>Ch.02 예고 — Business Master Data 미리보기</summary>
+    <div class="drill-body">
+      다음 챕터에서는 이번 챕터에서 조감도로만 본 <b>Business Partner → Contract Account → Contract → Connection Object → Premise → Installation</b> 계층을 각 객체의 역할과 관계 중심으로 상세히 다룹니다. 특히 "Rate는 Installation에 할당된다"는 점이 Ch.04 요금체계 이해의 전제조건이 되므로, 이 계층 구조를 확실히 익히는 것이 이번 시리즈의 가장 중요한 기초입니다.
+    </div>
+  </details>
+
+  <div class="footer-nav">
+    <span></span>
+    <a href="#">Ch.02 Business Master Data →</a>
+  </div>
+
+</main>
+
+<script>
+  // Tab active state on scroll
+  const sections = document.querySelectorAll('main section');
+  const tabs = document.querySelectorAll('nav.tabs a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if(rect.top <= 100) current = sec.id;
+    });
+    tabs.forEach(t => {
+      t.classList.toggle('active', t.getAttribute('href') === '#' + current);
+    });
+  });
+
+  // Quiz interaction
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.opt');
+    const feedback = quiz.querySelector('.feedback');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if(quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        const isCorrect = opt.dataset.correct === 'true';
+        opt.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+        if(!isCorrect){
+          quiz.querySelector('.opt[data-correct="true"]').classList.add('selected-correct');
+        }
+        feedback.textContent = isCorrect ? '정답입니다.' : '오답입니다. 정답이 강조 표시되었습니다.';
+        feedback.classList.add('show', isCorrect ? 'correct' : 'wrong');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
